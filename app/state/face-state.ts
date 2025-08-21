@@ -6,11 +6,31 @@ import {
   loadFaceLandmarkTinyModel,
   loadTinyFaceDetectorModel,
 } from "face-api.js";
-import { proxy, useSnapshot } from "valtio";
+import { proxy, ref, useSnapshot } from "valtio";
 import { cameraState } from "./camera-state";
 import { Vec2 } from "ogl";
+import { MotionValue, motionValue, springValue } from "motion/react";
+
+export type FacingSprings = Record<
+  "yaw" | "pitch" | "posX" | "posY",
+  MotionValue<number>
+>;
 
 function createFaceStore() {
+  const rawFacing: FacingSprings = {
+    yaw: motionValue(0),
+    pitch: motionValue(0),
+    posX: motionValue(0),
+    posY: motionValue(0),
+  };
+
+  const springFacing: FacingSprings = {
+    yaw: springValue(rawFacing.yaw, { stiffness: 0.1 }),
+    pitch: springValue(rawFacing.pitch, { stiffness: 0.1 }),
+    posX: springValue(rawFacing.posX, { stiffness: 0.1 }),
+    posY: springValue(rawFacing.posY, { stiffness: 0.1 }),
+  };
+
   const store = proxy({
     modelsLoaded: false,
     modelsFailed: false,
@@ -25,12 +45,7 @@ function createFaceStore() {
     runUpdate() {
       updateFaceTracking();
     },
-    facing: {
-      horizontal: 0,
-      vertical: 0,
-      positionX: 0,
-      positionY: 0,
-    },
+    facing: ref(springFacing),
   });
 
   async function loadModels() {
@@ -89,6 +104,11 @@ function createFaceStore() {
 
     const rx = (jawY - mouth.y) / box.height;
     const ry = (eyeLeft.x + (eyeRight.x - eyeLeft.x) / 2 - nose.x) / box.width;
+
+    rawFacing.yaw.set(rx);
+    rawFacing.pitch.set(ry);
+    rawFacing.posX.set(box.x + box.width / 2);
+    rawFacing.posY.set(box.y + box.height / 2);
 
     console.log(rx.toFixed(3), ry.toFixed(3));
 

@@ -3,6 +3,7 @@ import { useCameraState } from "~/state/camera-state";
 import { faceStore, useFaceState } from "~/state/face-state";
 import { MirrorCanvas } from "./canvas/MirrorCanvas";
 import { subscribe } from "valtio";
+import { useAnimationFrame } from "motion/react";
 
 export function Background() {
   const camera = useCameraState();
@@ -45,5 +46,27 @@ export function Background() {
     });
   }, [mirror]);
 
-  return <div ref={ref} className="absolute inset-0 bg-neutral-950"></div>;
+  const debug = useRef<HTMLDivElement>(null);
+
+  useAnimationFrame(() => {
+    const vals = [
+      faceState.facing.pitch,
+      faceState.facing.yaw,
+      faceState.facing.posX,
+      faceState.facing.posY,
+    ];
+
+    debug.current!.innerHTML = vals
+      .map((val) => val.get().toFixed(3))
+      .join(", ");
+  });
+
+  return (
+    <div ref={ref} className="absolute inset-0 bg-neutral-950">
+      <div
+        className="absolute z-50 text-center font-mono left-0 bottom-0 right-0"
+        ref={debug}
+      ></div>
+    </div>
+  );
 }
