@@ -25,10 +25,10 @@ function createFaceStore() {
   };
 
   const springFacing: FacingSprings = {
-    yaw: springValue(rawFacing.yaw, { stiffness: 0.1 }),
-    pitch: springValue(rawFacing.pitch, { stiffness: 0.1 }),
-    posX: springValue(rawFacing.posX, { stiffness: 0.1 }),
-    posY: springValue(rawFacing.posY, { stiffness: 0.1 }),
+    yaw: springValue(rawFacing.yaw, { stiffness: 300 }),
+    pitch: springValue(rawFacing.pitch, { stiffness: 300 }),
+    posX: springValue(rawFacing.posX, { stiffness: 300 }),
+    posY: springValue(rawFacing.posY, { stiffness: 300 }),
   };
 
   const store = proxy({
