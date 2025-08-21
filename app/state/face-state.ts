@@ -50,7 +50,7 @@ function createFaceStore() {
 
   async function loadModels() {
     await loadTinyFaceDetectorModel("/");
-    await loadFaceLandmarkModel("/");
+    // await loadFaceLandmarkModel("/");
     await loadFaceDetectionModel("/");
     await loadFaceLandmarkTinyModel("/");
   }
