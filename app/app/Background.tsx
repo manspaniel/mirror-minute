@@ -38,26 +38,19 @@ export function Background() {
     return () => clearTimeout(timer);
   }, [camera.video]);
 
-  useEffect(() => {
-    return subscribe(faceStore, () => {
-      if (mirror && faceStore.faceParts) {
-        mirror.drawDebugFaceParts(faceStore.faceParts);
-      }
-    });
-  }, [mirror]);
+  // useEffect(() => {
+  //   return subscribe(faceStore, () => {
+  //     if (mirror && faceStore.faceParts) {
+  //       mirror.drawDebugFaceParts(faceStore.faceParts);
+  //     }
+  //   });
+  // }, [mirror]);
 
   const debug = useRef<HTMLDivElement>(null);
 
   useAnimationFrame(() => {
-    const vals = [
-      faceState.facing.pitch,
-      faceState.facing.yaw,
-      faceState.facing.posX,
-      faceState.facing.posY,
-    ];
-
-    debug.current!.innerHTML = vals
-      .map((val) => val.get().toFixed(3))
+    debug.current!.innerHTML = Object.entries(faceState.facing)
+      .map(([key, val]) => key + ": " + val.get().toFixed(3))
       .join(", ");
   });
 

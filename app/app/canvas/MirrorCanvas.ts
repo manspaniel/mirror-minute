@@ -18,6 +18,7 @@ import {
   loadFaceLandmarkTinyModel,
   loadTinyFaceDetectorModel,
 } from "face-api.js";
+import { faceStore } from "~/state/face-state";
 
 const vertex = /* glsl */ `
 attribute vec2 uv;
@@ -131,6 +132,8 @@ export class MirrorCanvas {
     this.updateBounds(this.cameraSize, this.cameraBounds);
 
     this.renderer.render({ scene: this.scene });
+
+    this.drawDebug();
   }
 
   private frame = (t: number) => {
@@ -223,7 +226,8 @@ export class MirrorCanvas {
     this.draw();
   }
 
-  drawDebugFaceParts(parts: Record<string, FacePoint[] | undefined>) {
+  drawDebug() {
+    const parts = faceStore.faceParts;
     const ctx = this.debugCtx;
 
     ctx.clearRect(0, 0, ctx.canvas.width, ctx.canvas.height);
@@ -246,11 +250,38 @@ export class MirrorCanvas {
     }
 
     for (const part in parts) {
-      const points = parts[part];
+      const points = parts[part as keyof typeof parts];
       if (points) {
         drawPath(points);
       }
     }
+
+    ctx.beginPath();
+    const nose = faceStore.faceParts?.nose?.[3];
+    if (nose) {
+      ctx.arc(nose.x, nose.y, 5, 0, Math.PI * 2);
+      ctx.fillStyle = "yellow";
+      ctx.fill();
+    }
+
+    ctx.beginPath();
+    const centerX = faceStore.facing.posX.get() * this.cameraSize.x;
+    const centerY = faceStore.facing.posY.get() * this.cameraSize.y;
+    ctx.arc(centerX, centerY, 5, 0, Math.PI * 2);
+    ctx.fillStyle = "red";
+    ctx.fill();
+
+    ctx.beginPath();
+    const yaw = faceStore.facing.yaw.get();
+    const pitch = faceStore.facing.pitch.get();
+    ctx.moveTo(centerX, centerY);
+    ctx.lineTo(centerX - yaw * 100, centerY - pitch * 100);
+    ctx.stroke();
+    ctx.beginPath();
+    ctx.arc(centerX, centerY, 80, 0, Math.PI * 2);
+    ctx.strokeStyle = "blue";
+    ctx.stroke();
+    // console.log(this.cameraSize.x / 0.5, this.cameraSize.y / 0.5);
 
     ctx.restore();
   }
