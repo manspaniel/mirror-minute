@@ -10,6 +10,7 @@ function cameraStateStore() {
       | "accepted"
       | "error"
       | "nocamera",
+    hasChosenCamera: false,
     deviceId: null as null | string,
     switchDevice(deviceId: string) {
       store.deviceId = deviceId;
@@ -19,6 +20,12 @@ function cameraStateStore() {
     async stop() {
       if (store.mediaStream) {
         store.mediaStream.getTracks().forEach((t) => t.stop());
+      }
+      if (store.video) {
+        store.video.pause();
+        store.video.srcObject = null;
+        store.video.remove();
+        store.video = null;
       }
     },
     async start() {
@@ -41,16 +48,17 @@ function cameraStateStore() {
     },
   });
 
-  subscribeKey(store, "status", async () => {
+  async function attachCamera() {
+    await store.stop();
     if (store.status === "accepted") {
       const constraints: MediaStreamConstraints[] = [];
-      if (store.deviceId) {
-        constraints.push({
-          video: {
-            deviceId: store.deviceId,
-          },
-        });
-      }
+      // if (store.deviceId) {
+      //   constraints.push({
+      //     video: {
+      //       deviceId: store.deviceId,
+      //     },
+      //   });
+      // } else {
       constraints.push({
         video: {
           facingMode: {
@@ -61,6 +69,9 @@ function cameraStateStore() {
       constraints.push({
         video: true,
       });
+      // }
+
+      console.log("Constraints", constraints);
 
       for (let constraint of constraints) {
         const stream = await navigator.mediaDevices.getUserMedia(constraint);
@@ -89,6 +100,14 @@ function cameraStateStore() {
       });
       store.video = ref(video);
     }
+  }
+
+  subscribeKey(store, "status", async () => {
+    await attachCamera();
+  });
+
+  subscribeKey(store, "deviceId", async () => {
+    await attachCamera();
   });
 
   return store;

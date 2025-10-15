@@ -1,5 +1,4 @@
 import { useAppState } from "~/state/app-state";
-import { useSplashScreen } from "~/state/states";
 import { Button } from "~/ui/Button";
 
 export function LandingContent() {

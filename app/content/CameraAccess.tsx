@@ -51,23 +51,26 @@ export function CameraAccess() {
     );
     accessControl = <Button onClick={() => camera.start()}>Try again</Button>;
   } else if (camera.status === "accepted") {
-    accessControl = <Button>Done!</Button>;
+    // accessControl = <Button>Done!</Button>;
     // instructions = (
     //   <p>Alright! Let's make sure you've got the right camera selected</p>
     // );
     // accessControl = (
-    //   <select
-    //     value={camera.deviceId ?? ""}
-    //     onChange={(e) => {
-    //       camera.switchDevice(e.currentTarget.value);
-    //     }}
-    //   >
-    //     {devices.map((device, i) => (
-    //       <option key={device.deviceId ?? i} value={device.deviceId}>
-    //         {device.label}
-    //       </option>
-    //     ))}
-    //   </select>
+    //   <>
+    //     <select
+    //       value={camera.deviceId ?? ""}
+    //       onChange={(e) => {
+    //         camera.switchDevice(e.currentTarget.value);
+    //       }}
+    //     >
+    //       {devices.map((device, i) => (
+    //         <option key={device.deviceId ?? i} value={device.deviceId}>
+    //           {device.label}
+    //         </option>
+    //       ))}
+    //     </select>
+    //     <Button onClick={() => camera.start()}>Start Camera</Button>
+    //   </>
     // );
   }
 

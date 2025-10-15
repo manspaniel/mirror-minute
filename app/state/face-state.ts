@@ -12,9 +12,19 @@ import { mapRange } from "~/utils/math";
 import { cameraState } from "./camera-state";
 
 export type FacingSprings = Record<
-  "yaw" | "pitch" | "posX" | "posY" | "validity",
+  | "yaw"
+  | "pitch"
+  | "posX"
+  | "posY"
+  | "zoom"
+  | "centerValidity"
+  | "angleValidity"
+  | "zoomValidity"
+  | "validity",
   MotionValue<number>
 >;
+
+export type FaceWarningType = "noface" | "angle" | "position" | "zoom";
 
 function createFaceStore() {
   const rawFacing: FacingSprings = {
@@ -22,7 +32,11 @@ function createFaceStore() {
     pitch: motionValue(0),
     posX: motionValue(0),
     posY: motionValue(0),
+    zoom: motionValue(1),
     validity: motionValue(1),
+    centerValidity: motionValue(1),
+    angleValidity: motionValue(1),
+    zoomValidity: motionValue(1),
   };
 
   const springFacing: FacingSprings = {
@@ -48,7 +62,27 @@ function createFaceStore() {
       bounce: 0,
       damping: 50,
     }),
+    zoom: springValue(rawFacing.zoom, {
+      stiffness: 600,
+      bounce: 0,
+      damping: 50,
+    }),
     validity: springValue(rawFacing.validity, {
+      stiffness: 600,
+      bounce: 0,
+      damping: 50,
+    }),
+    centerValidity: springValue(rawFacing.centerValidity, {
+      stiffness: 600,
+      bounce: 0,
+      damping: 50,
+    }),
+    angleValidity: springValue(rawFacing.angleValidity, {
+      stiffness: 600,
+      bounce: 0,
+      damping: 50,
+    }),
+    zoomValidity: springValue(rawFacing.zoomValidity, {
       stiffness: 600,
       bounce: 0,
       damping: 50,
@@ -59,6 +93,7 @@ function createFaceStore() {
     modelsLoaded: false,
     modelsFailed: false,
     hasFace: false,
+    faceWarnings: [] as FaceWarningType[],
     setHasFace(value: boolean) {
       return value;
     },
@@ -70,6 +105,12 @@ function createFaceStore() {
       updateFaceTracking();
     },
     facing: ref(springFacing),
+    cameraBounds: ref({
+      x: 0,
+      y: 0,
+      w: 0,
+      h: 0,
+    }),
   });
 
   async function loadModels() {
@@ -102,8 +143,8 @@ function createFaceStore() {
 
   async function updateFaceTracking() {
     if (!cameraState.video || !store.modelsLoaded) {
+      store.faceWarnings = [];
       store.hasFace = false;
-      rawFacing.validity.set(1);
       return;
     }
     const result = await detectSingleFace(cameraState.video).withFaceLandmarks(
@@ -112,9 +153,11 @@ function createFaceStore() {
 
     if (!result?.landmarks) {
       store.hasFace = false;
-      rawFacing.validity.set(1);
+      store.faceWarnings = ["noface"];
       return;
     }
+
+    const faceWarnings: FaceWarningType[] = [];
 
     const box = result.detection.box;
 
@@ -146,11 +189,67 @@ function createFaceStore() {
       (box.y + box.height / 2) / cameraState.video.videoHeight
     );
 
-    rawFacing.validity.set(
-      mapRange(pitch, 0.15, 0.27, -1, 1)
-      // Math.pow(Math.abs(pitch / 0.2), 1.1) +
-      //   Math.pow(Math.abs((yaw - 0.24) / 0.2), 1.1)
+    const zoom = Math.max(
+      box.width / cameraState.video.videoWidth,
+      box.height / cameraState.video.videoHeight
     );
+    rawFacing.zoom.set(zoom);
+
+    // Validity calculations
+    rawFacing.centerValidity.set(
+      1 -
+        Math.min(
+          1,
+          Math.abs(rawFacing.posX.get() - 0.5) * 2 +
+            Math.abs(rawFacing.posY.get() - 0.5) * 2
+        )
+    );
+    rawFacing.angleValidity.set(
+      Math.abs(rawFacing.pitch.get()) < 0.4 &&
+        Math.abs(rawFacing.yaw.get()) < 0.4
+        ? 1
+        : 0
+    );
+    // Test if the face box is within the camera bounds
+    const isWithinBounds =
+      box.x > store.cameraBounds.x &&
+      box.y > store.cameraBounds.y &&
+      box.x + box.width < store.cameraBounds.x + store.cameraBounds.w &&
+      box.y + box.height < store.cameraBounds.y + store.cameraBounds.h;
+
+    rawFacing.zoomValidity.set(isWithinBounds ? 1 : 0);
+    rawFacing.validity.set(
+      (rawFacing.centerValidity.get() +
+        rawFacing.angleValidity.get() +
+        rawFacing.zoomValidity.get()) /
+        3
+    );
+
+    if (faceStore.facing.angleValidity.get() < 0.5) {
+      faceWarnings.push("angle");
+    }
+    if (faceStore.facing.zoomValidity.get() < 0.5) {
+      faceWarnings.push("zoom");
+    }
+    if (faceStore.facing.centerValidity.get() < 0.8) {
+      faceWarnings.push("position");
+    }
+
+    store.faceWarnings = faceWarnings;
+
+    // if (
+    //   Math.abs(rawFacing.pitch.get()) < 0.4 &&
+    //   Math.abs(rawFacing.yaw.get()) < 0.3 &&
+    // ) {
+    //   rawFacing.validity.set(1);
+    // } else {
+    //   rawFacing.validity.set(0);
+    // }
+    // rawFacing.validity.set(
+    //   mapRange(pitch, 0.15, 0.27, -1, 1)
+    //   // Math.pow(Math.abs(pitch / 0.2), 1.1) +
+    //   //   Math.pow(Math.abs((yaw - 0.24) / 0.2), 1.1)
+    // );
   }
 
   loadModels()

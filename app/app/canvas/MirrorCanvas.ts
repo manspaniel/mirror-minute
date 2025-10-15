@@ -217,6 +217,12 @@ export class MirrorCanvas {
     bounds.y = viewport.y / 2 - targetHeight / 2;
     bounds.z = targetWidth;
     bounds.w = targetHeight;
+
+    // Update the face camera bounds, to the rect from the camera that is within the bounds
+    faceStore.cameraBounds.x = (0 - bounds.x) * (size.x / bounds.z);
+    faceStore.cameraBounds.y = (0 - bounds.y) * (size.y / bounds.w);
+    faceStore.cameraBounds.w = viewport.x * (size.x / bounds.z);
+    faceStore.cameraBounds.h = viewport.y * (size.y / bounds.w);
   }
 
   resize() {
