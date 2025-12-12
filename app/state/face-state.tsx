@@ -10,6 +10,8 @@ import { Vec2 } from "ogl";
 import { proxy, ref, useSnapshot } from "valtio";
 import { mapRange } from "~/utils/math";
 import { cameraState } from "./camera-state";
+import { useWindowSize } from "usehooks-ts";
+import { useEffect } from "react";
 
 export type FacingSprings = Record<
   | "yaw"
@@ -111,6 +113,10 @@ function createFaceStore() {
       w: 0,
       h: 0,
     }),
+    faceBoxSize: {
+      width: 0,
+      height: 0,
+    },
   });
 
   async function loadModels() {
@@ -268,4 +274,27 @@ export const faceStore = createFaceStore();
 
 export function useFaceState() {
   return useSnapshot(faceStore);
+}
+
+export function FaceStateManager() {
+  const windowSize = useWindowSize({
+    debounceDelay: 100,
+  });
+
+  const faceState = useFaceState();
+
+  useEffect(() => {
+    let size = 0;
+
+    if (windowSize.width > windowSize.height) {
+      size = Math.min(windowSize.height * 0.6, windowSize.width * 0.5);
+    } else {
+      size = Math.min(windowSize.width * 0.8, windowSize.height * 0.5);
+    }
+
+    faceStore.faceBoxSize.width = size;
+    faceStore.faceBoxSize.height = size * 1.2;
+  }, [windowSize, faceState.faceBoxSize.width, faceState.faceBoxSize.height]);
+
+  return null;
 }

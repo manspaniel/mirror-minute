@@ -1,4 +1,5 @@
-import { animate, springValue, transformValue } from "motion/react";
+import { Point as FacePoint } from "face-api.js";
+import { animate } from "motion/react";
 import {
   Color,
   Mesh,
@@ -10,14 +11,7 @@ import {
   Vec2,
   Vec4,
 } from "ogl";
-import {
-  detectSingleFace,
-  Point as FacePoint,
-  loadFaceDetectionModel,
-  loadFaceLandmarkModel,
-  loadFaceLandmarkTinyModel,
-  loadTinyFaceDetectorModel,
-} from "face-api.js";
+import { cameraState } from "~/state/camera-state";
 import { faceStore } from "~/state/face-state";
 
 const vertex = /* glsl */ `
@@ -33,7 +27,7 @@ void main() {
 const fragment = /* glsl */ `
 precision highp float;
 uniform float uTime;
-uniform vec3  uColor;
+uniform vec3 uColor;
 uniform sampler2D uCamera;
 uniform vec2 uRes;
 uniform vec4 uCameraBounds;
@@ -46,12 +40,16 @@ void main() {
 
   vec3 cam = texture2D(uCamera, camUv).rgb * uCameraOpacity;
   vec3 fx  = 0.5 + 0.3 * cos(vec3(vUv.x, vUv.y, vUv.x) + uTime) + uColor;
-  gl_FragColor = vec4(cam + fx * 0.3, 1.0);
+  
+  gl_FragColor = vec4(cam + fx * 0.3, uCameraOpacity);
 }
 `;
 
 export class MirrorCanvas {
-  renderer = new Renderer({ dpr: Math.min(2, window.devicePixelRatio || 1) });
+  renderer = new Renderer({
+    dpr: Math.min(2, window.devicePixelRatio || 1),
+    alpha: true,
+  });
   gl = this.renderer.gl;
   scene = new Transform();
 
@@ -69,12 +67,12 @@ export class MirrorCanvas {
 
   abortController = new AbortController();
 
-  debugCanvas = document.createElement("canvas");
-  debugCtx = this.debugCanvas.getContext("2d")!;
+  overlayCanvas = document.createElement("canvas");
+  overlayCtx = this.overlayCanvas.getContext("2d")!;
 
   uniforms = {
     uTime: { value: 0 },
-    uColor: { value: new Color(0.3, 0.2, 0.5) },
+    uColor: { value: new Color(0.902, 0.902, 1.0) },
     uRes: { value: this.size },
     uCameraOpacity: { value: 0.0 },
     uCameraBounds: { value: this.cameraBounds },
@@ -84,8 +82,8 @@ export class MirrorCanvas {
   constructor(public container: HTMLElement) {
     container.appendChild(this.gl.canvas);
     this.gl.canvas.style.position = "absolute";
-    container.appendChild(this.debugCanvas);
-    this.debugCanvas.style.position = "absolute";
+    container.appendChild(this.overlayCanvas);
+    this.overlayCanvas.style.position = "absolute";
     window.addEventListener("resize", () => this.resize());
     this.frame(0);
 
@@ -133,10 +131,12 @@ export class MirrorCanvas {
 
     this.renderer.render({ scene: this.scene });
 
+    this.drawOverlay();
     this.drawDebug();
   }
 
   private frame = (t: number) => {
+    this.time = t;
     this.draw();
     this.raf = requestAnimationFrame(this.frame);
   };
@@ -227,16 +227,75 @@ export class MirrorCanvas {
 
   resize() {
     this.renderer.setSize(this.size.x, this.size.y);
-    this.debugCanvas.width = this.size.x;
-    this.debugCanvas.height = this.size.y;
+    this.overlayCanvas.width = this.size.x;
+    this.overlayCanvas.height = this.size.y;
     this.draw();
+  }
+
+  drawOverlay() {
+    const ctx = this.overlayCtx;
+    ctx.clearRect(0, 0, ctx.canvas.width, ctx.canvas.height);
+    if (faceStore.hasFace || !cameraState.mediaStream) {
+      return;
+    }
+
+    ctx.save();
+
+    const faceCircleSize = faceStore.faceBoxSize;
+
+    // ctx.strokeStyle = "red";
+    // ctx.lineWidth = 4;
+    // ctx.strokeRect(
+    //   this.size.x / 2 - faceCircleSize.width / 2,
+    //   this.size.y / 2 - faceCircleSize.height / 2,
+    //   faceCircleSize.width,
+    //   faceCircleSize.height
+    // );
+
+    const pitch = faceStore.facing.pitch.get();
+    const yaw = faceStore.facing.yaw.get();
+
+    const faceAngle = Math.atan2(pitch, yaw);
+    const faceDistance = Math.hypot(pitch, yaw);
+
+    const numPills = 200;
+    const rx = faceCircleSize.width / 2;
+    const ry = faceCircleSize.height / 2;
+    const circumference =
+      Math.PI * (3 * (rx + ry) - Math.sqrt((3 * rx + ry) * (rx + 3 * ry)));
+    ctx.fillStyle = "rgba(255,0,0,0.5)";
+    for (let i = 0; i < numPills; i++) {
+      const angle = (i / numPills) * Math.PI * 2;
+      const x = Math.cos(angle) * rx + this.size.x / 2;
+      const y = Math.sin(angle) * ry + this.size.y / 2;
+
+      const errorAmount =
+        1 -
+        Math.hypot(
+          Math.sin(angle) - Math.sin(faceAngle) * faceDistance,
+          Math.cos(angle) - Math.cos(faceAngle) * faceDistance
+        );
+
+      // const offset =
+      //   Math.sin((i / numPills) * Math.PI * 4 + (this.time / 1000) * 2) * 10;
+      const offset = 0;
+      const length = errorAmount * 20;
+      ctx.lineWidth = (circumference / numPills) * 0.5;
+      ctx.lineCap = "round";
+      ctx.strokeStyle = "rgba(255,0,0,1)";
+      ctx.beginPath();
+      ctx.moveTo(x + Math.cos(angle) * offset, y + Math.sin(angle) * offset);
+      ctx.lineTo(x + Math.cos(angle) * length, y + Math.sin(angle) * length);
+      ctx.stroke();
+    }
+
+    ctx.restore();
   }
 
   drawDebug() {
     const parts = faceStore.faceParts;
-    const ctx = this.debugCtx;
+    const ctx = this.overlayCtx;
 
-    ctx.clearRect(0, 0, ctx.canvas.width, ctx.canvas.height);
     ctx.save();
 
     // Accomodate for the bounds of the camera
@@ -270,24 +329,26 @@ export class MirrorCanvas {
       ctx.fill();
     }
 
-    ctx.beginPath();
-    const centerX = faceStore.facing.posX.get() * this.cameraSize.x;
-    const centerY = faceStore.facing.posY.get() * this.cameraSize.y;
-    ctx.arc(centerX, centerY, 5, 0, Math.PI * 2);
-    ctx.fillStyle = "red";
-    ctx.fill();
+    if (faceStore.hasFace) {
+      ctx.beginPath();
+      const centerX = faceStore.facing.posX.get() * this.cameraSize.x;
+      const centerY = faceStore.facing.posY.get() * this.cameraSize.y;
+      ctx.arc(centerX, centerY, 5, 0, Math.PI * 2);
+      ctx.fillStyle = "red";
+      ctx.fill();
 
-    ctx.beginPath();
-    const yaw = faceStore.facing.yaw.get();
-    const pitch = faceStore.facing.pitch.get();
-    ctx.moveTo(centerX, centerY);
-    ctx.lineTo(centerX - yaw * 100, centerY - pitch * 100);
-    ctx.stroke();
-    ctx.beginPath();
-    ctx.arc(centerX, centerY, 80, 0, Math.PI * 2);
-    ctx.strokeStyle = "blue";
-    ctx.stroke();
-    // console.log(this.cameraSize.x / 0.5, this.cameraSize.y / 0.5);
+      ctx.beginPath();
+      const yaw = faceStore.facing.yaw.get();
+      const pitch = faceStore.facing.pitch.get();
+      ctx.moveTo(centerX, centerY);
+      ctx.lineTo(centerX - yaw * 100, centerY - pitch * 100);
+      ctx.stroke();
+      ctx.beginPath();
+      ctx.arc(centerX, centerY, 80, 0, Math.PI * 2);
+      ctx.strokeStyle = "blue";
+      ctx.stroke();
+      // console.log(this.cameraSize.x / 0.5, this.cameraSize.y / 0.5);
+    }
 
     ctx.restore();
   }

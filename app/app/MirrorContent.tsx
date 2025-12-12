@@ -58,13 +58,19 @@ export function ChallengeOverlay() {
 
   return (
     <>
-      <motion.div className="absolute top-1/2 left-1/2 w-[min(50vw,50vh)] h-[min(50vw,50vh)] -translate-x-1/2 -translate-y-1/2">
+      <motion.div
+        className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2"
+        animate={{
+          width: faceState.faceBoxSize.width,
+          height: faceState.faceBoxSize.height,
+        }}
+      >
         <motion.div
           animate={{
             opacity:
               faceState.hasFace && (!!faceNotes || !challenge.started) ? 1 : 0,
           }}
-          className="absolute inset-0 border-4 border-white border-dashed rounded-full"
+          className="absolute inset-0 rounded-full"
         ></motion.div>
         <AnimatePresence mode="wait">
           {!!faceNotes && (

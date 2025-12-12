@@ -1,7 +1,7 @@
 import { AnimatePresence } from "motion/react";
 import { type ReactNode } from "react";
 import { CameraAccess } from "~/content/CameraAccess";
-import { LandingContent } from "~/content/LandingContent";
+import { LandingScreen } from "~/content/LandingScreen";
 import { ModalScreen } from "~/layouts/ModalScreen";
 import { useAppState } from "~/state/app-state";
 import { useCameraState } from "~/state/camera-state";
@@ -15,7 +15,7 @@ export function Screens() {
   if (!state.hasDismissedLanding) {
     screenContent = (
       <ModalScreen key="landingScreen">
-        <LandingContent />
+        <LandingScreen />
       </ModalScreen>
     );
   } else if (!camera.mediaStream) {
@@ -27,7 +27,7 @@ export function Screens() {
   }
 
   return (
-    <AnimatePresence mode="wait" initial={false}>
+    <AnimatePresence mode="wait" initial={true}>
       {screenContent}
     </AnimatePresence>
   );

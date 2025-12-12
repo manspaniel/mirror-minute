@@ -1,3 +1,9 @@
 {
-  "tailwindCSS.classFunctions": ["tv", "cn"]
+  "typescript.preferences.autoImportFileExcludePatterns": [
+    "tailwind-merge",
+    "tailwind-variants"
+  ],
+  "editor.suggest.localityBonus": true,
+  "tailwindCSS.classFunctions": ["cn", "tv", "cx"],
+  "tailwindCSS.classAttributes": ["class", "className", "classes"]
 }

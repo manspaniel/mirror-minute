@@ -55,9 +55,9 @@ export function Background() {
   });
 
   return (
-    <div ref={ref} className="absolute inset-0 bg-neutral-950">
+    <div ref={ref} className="absolute inset-0">
       <div
-        className="absolute z-50 text-center font-mono left-0 bottom-0 right-0"
+        className="absolute z-50 text-center font-mono left-0 bottom-0 right-0 text-xs"
         ref={debug}
       ></div>
     </div>
