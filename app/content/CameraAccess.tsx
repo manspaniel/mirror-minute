@@ -36,6 +36,7 @@ export function CameraAccess() {
 
   if (camera.status === "pending") {
     accessControl = <Button loading>Starting...</Button>;
+    instructions = "Please allow access to continue";
   } else if (
     camera.status === "error" ||
     camera.status === "rejected" ||
@@ -104,7 +105,7 @@ export function CameraAccess() {
             initial={{ opacity: 0 }}
             animate={{ opacity: 1 }}
             exit={{ opacity: 0 }}
-            className="md:whitespace-pre-wrap outline"
+            className="md:whitespace-pre-wrap"
           >
             {instructions}
           </motion.div>

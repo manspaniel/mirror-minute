@@ -153,9 +153,9 @@ export function LandingScreen() {
                   transition: { duration: 1, ease: "easeInOut", delay: 3.3 },
                 }}
                 exit={{ width: 0 }}
-                className="font-sans uppercase leading-[1em] mask-[linear-gradient(90deg,black_0%,black_calc(100%-20px),transparent_100%)] overflow-hidden whitespace-nowrap"
+                className="font-sans uppercase leading-[1em] mask-[linear-gradient(90deg,black_0%,black_calc(100%-1em),transparent_100%)] overflow-hidden whitespace-nowrap"
               >
-                <div className="pr-[10px]">
+                <div className="pr-[1em]">
                   Laugh Lines
                   <br />
                   Project
