@@ -2,9 +2,15 @@ import { proxy, useSnapshot } from "valtio";
 
 function createAppState() {
   const store = proxy({
-    hasDismissedLanding: false,
+    screen: "landing" as "landing" | "camera" | "challenge" | "complete",
     dismissLanding() {
-      store.hasDismissedLanding = true;
+      store.screen = "camera";
+    },
+    doneWithCamera() {
+      store.screen = "challenge";
+    },
+    completeChallenge() {
+      store.screen = "complete";
     },
   });
 

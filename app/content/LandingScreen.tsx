@@ -2,6 +2,7 @@ import { animate, motion, useMotionValue } from "motion/react";
 import { useEffect, useRef, useState } from "react";
 import { appState, useAppState } from "~/state/app-state";
 import { Button } from "~/ui/Button";
+import { BURST, DIAMOND } from "~/ui/svgs";
 
 export function LandingScreen() {
   const app = useAppState();
@@ -9,6 +10,22 @@ export function LandingScreen() {
   const [state, setState] = useState({
     step: "breathe" as "breathe" | "splash",
   });
+
+  useEffect(() => {
+    const abort = new AbortController();
+    window.addEventListener(
+      "keydown",
+      (e) => {
+        if (e.key === "Escape") {
+          appState.dismissLanding();
+        }
+      },
+      {
+        signal: abort.signal,
+      }
+    );
+    return () => abort.abort();
+  }, []);
 
   const breatheRef = useRef<HTMLDivElement>(null!);
 
@@ -104,7 +121,7 @@ export function LandingScreen() {
           </div>
           <div className="absolute inset-0 flex items-center justify-center">
             <div
-              className="text-indigo-900 text-3xl opacity-0 will-change-transform isolate"
+              className="text-indigo-950 text-3xl opacity-0 will-change-transform isolate"
               data-look-label
               style={{ transform: "scale(1.2)" }}
             >
@@ -149,7 +166,7 @@ export function LandingScreen() {
               <motion.div
                 initial={{ width: 0 }}
                 animate={{
-                  width: "auto",
+                  width: "9.5em",
                   transition: { duration: 1, ease: "easeInOut", delay: 3.3 },
                 }}
                 exit={{ width: 0 }}
@@ -196,8 +213,8 @@ export function LandingScreen() {
               <motion.path
                 d="M0 828.003C231.712 417.273 637.76 159.128 612.161 563.855C835.487 126.61 1099.86 88.0881 1146.2 407.767C1246.83 102.096 1749.54 -224.087 1714.23 224.164"
                 stroke="white"
-                stroke-width="8"
-                stroke-linejoin="round"
+                strokeWidth="8"
+                strokeLinejoin="round"
                 initial={{ pathLength: 0 }}
                 animate={{ pathLength: 1 }}
                 exit={{ pathOffset: 1 }}
@@ -263,7 +280,7 @@ export function LandingScreen() {
                       opacity: 1,
                       transition: { delay: 2.8 },
                     }}
-                    exit={{ rotate: "90deg", scale: 0.5, opacity: 0 }}
+                    exit={{ scale: 0.5, opacity: 0 }}
                     className="absolute left-[-1.1em] top-[-0.8em] size-[1em]"
                   >
                     {DIAMOND}
@@ -276,7 +293,7 @@ export function LandingScreen() {
                       opacity: 1,
                       transition: { delay: 3.1 },
                     }}
-                    exit={{ rotate: "-45deg", scale: 0.5, opacity: 0 }}
+                    exit={{ scale: 0.5, opacity: 0 }}
                     className="absolute left-[101%] bottom-[5%] size-[2em]"
                   >
                     {BURST}
@@ -343,7 +360,7 @@ const YOURSELF_VECTOR = (
     viewBox="0 0 153 77"
     fill="none"
     xmlns="http://www.w3.org/2000/svg"
-    className="absolute top-0 left-0 w-full h-full scale-[175%]"
+    className="absolute top-0 left-0 w-full h-full scale-[150%]"
     data-yourself-circle
     style={{ strokeDashoffset: "400px" }}
   >
@@ -353,38 +370,6 @@ const YOURSELF_VECTOR = (
       strokeWidth="4"
       strokeLinecap="round"
       strokeDasharray="400 400"
-    />
-  </svg>
-);
-
-const DIAMOND = (
-  <svg
-    width="32"
-    height="32"
-    viewBox="0 0 32 32"
-    fill="none"
-    xmlns="http://www.w3.org/2000/svg"
-    className="size-full"
-  >
-    <path
-      d="M15.087 0H16.913C17.6377 4.34487 19.4855 7.85698 22.4565 10.5363C25.442 13.2157 28.6232 14.7364 32 15.0984V16.9233C28.5507 17.2854 25.3478 18.8205 22.3913 21.5289C19.4493 24.2227 17.6232 27.7131 16.913 32H15.087C14.4058 27.6406 12.5652 24.1285 9.56522 21.4637C6.56522 18.7843 3.37681 17.2709 0 16.9233V15.0984C3.4058 14.7219 6.60145 13.1939 9.58696 10.5146C12.587 7.82077 14.4203 4.31591 15.087 0Z"
-      fill="currentColor"
-    />
-  </svg>
-);
-
-const BURST = (
-  <svg
-    width="64"
-    height="64"
-    viewBox="0 0 64 64"
-    fill="none"
-    xmlns="http://www.w3.org/2000/svg"
-    className="size-full"
-  >
-    <path
-      d="M41.4476 35.9285C45.981 33.6019 52.9143 32.8391 64 32.0381C52.9143 31.2372 45.981 30.4362 41.4476 28.1478C43.0095 23.3039 47.3905 17.8117 54.6667 9.42074C46.2476 16.6675 40.8 21.0536 35.9238 22.6174C33.6 18.0787 32.8381 11.1371 32.0381 0C31.2381 11.0989 30.4381 18.0405 28.1524 22.6174C23.3143 21.0536 17.8286 16.6675 9.44762 9.42074C16.6857 17.8498 21.0667 23.3039 22.6286 28.1478C18.0571 30.4362 11.0857 31.199 0 32C11.0857 32.801 18.019 33.6019 22.5905 35.8903C21.0286 40.7342 16.6476 46.2265 9.37143 54.6174C17.7905 47.3707 23.2381 42.9845 28.0762 41.3826C30.4 45.9213 31.1619 52.8629 31.9619 64C32.7619 52.9011 33.5619 45.9595 35.8476 41.3826C40.6857 42.9464 46.1714 47.3325 54.5524 54.6174C47.3905 46.2265 43.0095 40.7724 41.4476 35.9285Z"
-      fill="currentColor"
     />
   </svg>
 );

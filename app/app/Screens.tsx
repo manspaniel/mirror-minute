@@ -3,27 +3,30 @@ import { type ReactNode } from "react";
 import { CameraAccess } from "~/content/CameraAccess";
 import { LandingScreen } from "~/content/LandingScreen";
 import { ModalScreen } from "~/layouts/ModalScreen";
-import { useAppState } from "~/state/app-state";
+import { appState, useAppState } from "~/state/app-state";
 import { useCameraState } from "~/state/camera-state";
+import { useChallengeState } from "~/state/challenge-state";
 
 export function Screens() {
   const state = useAppState();
   const camera = useCameraState();
+  const challenge = useChallengeState();
 
   let screenContent: ReactNode = null;
 
-  if (!state.hasDismissedLanding) {
+  if (state.screen === "landing") {
     screenContent = (
       <ModalScreen key="landingScreen">
         <LandingScreen />
       </ModalScreen>
     );
-  } else if (!camera.mediaStream) {
+  } else if (state.screen === "camera") {
     screenContent = (
       <ModalScreen key="cameraAccess">
         <CameraAccess />
       </ModalScreen>
     );
+  } else if (state.screen === "challenge") {
   }
 
   return (

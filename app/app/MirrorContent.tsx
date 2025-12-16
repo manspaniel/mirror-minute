@@ -1,5 +1,7 @@
 import { AnimatePresence, motion } from "motion/react";
-import type { ReactNode } from "react";
+import { useEffect, useState, type ReactNode } from "react";
+import { useAppState } from "~/state/app-state";
+import { useCameraState } from "~/state/camera-state";
 import { useChallengeState } from "~/state/challenge-state";
 import { useFaceState } from "~/state/face-state";
 
@@ -14,46 +16,76 @@ export function MirrorContent() {
 export function ChallengeOverlay() {
   const faceState = useFaceState();
   const challenge = useChallengeState();
+  const appState = useAppState();
+  const cameraState = useCameraState();
+
+  const [enabled, setEnabled] = useState(false);
+
+  useEffect(() => {
+    if (appState.screen === "challenge") {
+      const timer = setTimeout(() => {
+        setEnabled(true);
+      }, 2000);
+      return () => {
+        clearTimeout(timer);
+      };
+    } else {
+      setEnabled(false);
+    }
+  }, [appState.screen === "challenge"]);
 
   let warningMessage = "";
   let warningNotes = "";
 
-  if (faceState.faceWarnings.includes("noface")) {
-    warningMessage = "We can't see your face";
-    warningNotes =
-      "Make sure your face is in the camera view, and that you're in a well-lit area.";
-  } else if (faceState.faceWarnings.includes("position")) {
-    warningMessage = "Please center your face within the circle";
-  } else if (faceState.faceWarnings.includes("angle")) {
-    warningMessage = "Please face the camera";
-    warningNotes = "Try to face the camera more directly.";
-  } else if (faceState.faceWarnings.includes("zoom")) {
-    warningMessage = "Your face isn't fully visible";
+  if (appState.screen === "challenge" && enabled) {
+    if (faceState.faceWarnings.includes("noface")) {
+      warningMessage = "We can't see your face";
+      warningNotes =
+        "Make sure your face is in the camera view, and that you're in a well-lit area.";
+    } else if (faceState.faceWarnings.includes("position")) {
+      warningMessage = "Centre yourself";
+      warningNotes =
+        "Centre your face within the circle and ensure your whole face is visible.";
+    } else if (faceState.faceWarnings.includes("angle")) {
+      warningMessage = "Please face the camera";
+      warningNotes = "Try to face the camera more directly.";
+    } else if (faceState.faceWarnings.includes("zoom")) {
+      warningMessage = "Your face isn't fully visible";
+    }
   }
 
-  let faceNotes = null as ReactNode;
+  let label = null as ReactNode;
+  let instructions = "";
   let challengeDisplay = null as ReactNode;
 
   if (warningMessage) {
-    faceNotes = <div className="text-red-600">{warningMessage}</div>;
+    label = <div>{warningMessage}</div>;
+    instructions = warningNotes;
   } else if (
     !challenge.started &&
     challenge.holdStillFor > 0 &&
-    challenge.faceCurrentlyCentered
+    challenge.faceCurrentlyCentered &&
+    appState.screen === "challenge" &&
+    enabled
   ) {
-    faceNotes = (
+    label = (
       <div>
         Hold still for {Math.ceil(challenge.holdStillFor / 1000)} seconds
       </div>
     );
   }
-  if (challenge.started) {
-    challengeDisplay = (
-      <div className="text-green-600">
-        Challenge started {challenge.timeElapsed / 1000} /{" "}
-        {challenge.totalDuration / 1000} seconds
-      </div>
-    );
+
+  if (challenge.started && enabled) {
+    const remaining = Math.max(0, challenge.timeRemaining);
+    const minutes = Math.floor(remaining / 60000);
+    const seconds = Math.floor((remaining % 60000) / 1000);
+    if (remaining > 0) {
+      challengeDisplay = (
+        <div className="text-white font-sans text-6xl tracking-wider leading-[0.8]">
+          {`${minutes}:${seconds.toString().padStart(2, "0")}`}
+        </div>
+      );
+    }
   }
 
   return (
@@ -68,26 +100,58 @@ export function ChallengeOverlay() {
         <motion.div
           animate={{
             opacity:
-              faceState.hasFace && (!!faceNotes || !challenge.started) ? 1 : 0,
+              faceState.hasFace && (!!label || !challenge.started) ? 1 : 0,
           }}
           className="absolute inset-0 rounded-full"
         ></motion.div>
+
+        {/* Label */}
         <AnimatePresence mode="wait">
-          {!!faceNotes && (
+          {!!label && (
             <motion.div
               initial={{ opacity: 0 }}
               animate={{ opacity: 1 }}
               exit={{ opacity: 0 }}
               key={warningMessage}
-              className="absolute top-full pt-4 -left-10 -right-10 text-center"
+              transition={{ duration: 0.2 }}
+              className="absolute top-full pt-8 -left-10 -right-10 text-center font-sans text-2xl text-white uppercase"
             >
-              {faceNotes}
+              {label}
             </motion.div>
           )}
         </AnimatePresence>
       </motion.div>
-      <div className="absolute top-0 left-0 right-0 flex p-4 items-center justify-center text-center flex-col gap-2">
-        {challengeDisplay}
+
+      {/* Extra instructions */}
+      <div className="fixed bottom-4 md:bottom-8 left-2 right-2 text-center text-lg font-serif text-white leading-[1.4]">
+        <AnimatePresence mode="wait" propagate>
+          {instructions && (
+            <motion.div
+              key={instructions}
+              initial={{ opacity: 0 }}
+              animate={{ opacity: 1 }}
+              exit={{ opacity: 0 }}
+              transition={{ duration: 0.2 }}
+              className="md:whitespace-pre-wrap"
+            >
+              {instructions}
+            </motion.div>
+          )}
+        </AnimatePresence>
+      </div>
+      {/* Countdown */}
+      <div className="absolute top-0 left-0 flex items-center justify-center text-center flex-col gap-2 p-8 pointer-events-none">
+        <AnimatePresence mode="wait">
+          {challengeDisplay ? (
+            <motion.div
+              initial={{ opacity: 0, filter: "blur(10px)", scale: 0.8 }}
+              animate={{ opacity: 1, filter: "blur(0px)", scale: 1 }}
+              exit={{ opacity: 0, filter: "blur(10px)", scale: 0.8 }}
+            >
+              {challengeDisplay}
+            </motion.div>
+          ) : null}
+        </AnimatePresence>
       </div>
     </>
   );

@@ -2,6 +2,9 @@ import { proxy, subscribe, useSnapshot } from "valtio";
 import { subscribeKey } from "valtio/utils";
 import { faceStore } from "./face-state";
 import { useInterval } from "usehooks-ts";
+import { useAppState } from "./app-state";
+import { useCameraState } from "./camera-state";
+import { useEffect } from "react";
 
 const CHALLENGE_DURATION = 60 * 1000;
 
@@ -16,6 +19,7 @@ function createChallengeState() {
     faceCurrentlyCentered: false,
     holdStillFor: 3000,
     faceDirections: null as null | string,
+    isActive: false,
   });
 
   subscribeKey(store, "faceCurrentlyCentered", () => {
@@ -54,8 +58,19 @@ export function useChallengeState() {
 
 export function ChallengeManager() {
   const store = challengeState;
+  const appState = useAppState();
+  const cameraState = useCameraState();
+
+  // const challengeScreenActive = appState.starting;
+
+  // useEffect(() => {
+  //   store.isActive = challengeScreenActive;
+  // }, [challengeScreenActive]);
 
   useInterval(() => {
+    const preparing = appState.screen === "challenge" && !store.started;
+    if (!preparing) return;
+
     if (store.faceCurrentlyCentered && !store.paused) {
       store.holdStillFor -= 200;
     } else {

@@ -3,11 +3,15 @@ import { useCameraState } from "~/state/camera-state";
 import { faceStore, useFaceState } from "~/state/face-state";
 import { MirrorCanvas } from "./canvas/MirrorCanvas";
 import { subscribe } from "valtio";
-import { useAnimationFrame } from "motion/react";
+import { useAnimationFrame, useMotionValueEvent } from "motion/react";
+import { useChallengeState } from "~/state/challenge-state";
+import { useAppState } from "~/state/app-state";
 
 export function Background() {
   const camera = useCameraState();
   const faceState = useFaceState();
+  const appState = useAppState();
+  const challenge = useChallengeState();
 
   const ref = useRef<HTMLDivElement>(null!);
 
@@ -18,6 +22,26 @@ export function Background() {
     setMirror(mirror);
     return () => mirror.dispose();
   }, [MirrorCanvas, ref]);
+
+  useEffect(() => {
+    if (!mirror) return;
+    const timer = setTimeout(() => {
+      mirror.setBackgroundMode(appState.screen === "challenge" ? false : true);
+      mirror.setGuideVisibility(appState.screen === "challenge");
+    }, 50);
+    return () => clearTimeout(timer);
+  }, [mirror, appState.screen]);
+
+  useEffect(() => {
+    if (!mirror) return;
+    if (faceState.faceWarnings.length > 0) {
+      mirror.setChallengeStarted(false);
+    } else if (challenge.started) {
+      mirror.setChallengeStarted(true);
+    } else {
+      mirror.setChallengeStarted(false);
+    }
+  }, [mirror, challenge.started, faceState.faceWarnings]);
 
   useEffect(() => {
     if (!mirror) return;
@@ -49,17 +73,19 @@ export function Background() {
   const debug = useRef<HTMLDivElement>(null);
 
   useAnimationFrame(() => {
-    debug.current!.innerHTML = Object.entries(faceState.facing)
-      .map(([key, val]) => key + ": " + val.get().toFixed(3))
-      .join(", ");
+    if (debug.current) {
+      debug.current.innerHTML = Object.entries(faceState.facing)
+        .map(([key, val]) => key + ": " + val.get().toFixed(3))
+        .join(", ");
+    }
   });
 
   return (
     <div ref={ref} className="absolute inset-0">
-      <div
+      {/* <div
         className="absolute z-50 text-center font-mono left-0 bottom-0 right-0 text-xs"
         ref={debug}
-      ></div>
+      ></div> */}
     </div>
   );
 }

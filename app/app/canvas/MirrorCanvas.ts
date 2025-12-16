@@ -1,5 +1,5 @@
 import { Point as FacePoint } from "face-api.js";
-import { animate } from "motion/react";
+import { animate, motionValue } from "motion/react";
 import {
   Color,
   Mesh,
@@ -28,20 +28,38 @@ const fragment = /* glsl */ `
 precision highp float;
 uniform float uTime;
 uniform vec3 uColor;
+
 uniform sampler2D uCamera;
-uniform vec2 uRes;
 uniform vec4 uCameraBounds;
 uniform float uCameraOpacity;
+
+uniform sampler2D uPlaceholder;
+uniform vec4 uPlaceholderBounds;
+uniform float uPlaceholderOpacity;
+
+uniform vec2 uRes;
+uniform float uFaded;
 varying vec2 vUv;
 void main() {
   vec2 camUv = vec2(vUv.x * uRes.x, vUv.y * uRes.y);
   camUv -= uCameraBounds.xy;
   camUv /= uCameraBounds.zw;
 
-  vec3 cam = texture2D(uCamera, camUv).rgb * uCameraOpacity;
-  vec3 fx  = 0.5 + 0.3 * cos(vec3(vUv.x, vUv.y, vUv.x) + uTime) + uColor;
+  vec2 placeholderUv = vec2(vUv.x * uRes.x, vUv.y * uRes.y);
+  placeholderUv -= uPlaceholderBounds.xy;
+  placeholderUv /= uPlaceholderBounds.zw;
+
+  vec3 cam = texture2D(uCamera, camUv).rgb;
+  vec3 placeholder = texture2D(uPlaceholder, placeholderUv).rgb;
+
+  cam = mix(mix(vec3(0.5), placeholder, uPlaceholderOpacity), cam, uCameraOpacity);
+
+  float brightness = (cam.r + cam.g + cam.b) / 3.0;
+  vec3 faded = mix(vec3(0.871,0.875,1.0), vec3(0.957,0.961,1.0), brightness);
+  // vec3 fx  = 0.5 + 0.3 * cos(vec3(vUv.x, vUv.y, vUv.x) + uTime) + uColor;
   
-  gl_FragColor = vec4(cam + fx * 0.3, uCameraOpacity);
+  gl_FragColor = vec4(mix(cam, faded, uFaded), 1.0);
+  // gl_FragColor = vec4(placeholder, 1.0);
 }
 `;
 
@@ -62,6 +80,14 @@ export class MirrorCanvas {
     flipY: true,
   });
 
+  placeholderBounds = new Vec4(0, 0, 0, 0);
+  placeholderSize = new Vec2(0, 0);
+  placeholderTexture = new Texture(this.gl, {
+    generateMipmaps: false,
+    flipY: true,
+  });
+  placeholderVideo = document.createElement("video");
+
   time = 0;
   raf = 0;
 
@@ -75,8 +101,22 @@ export class MirrorCanvas {
     uColor: { value: new Color(0.902, 0.902, 1.0) },
     uRes: { value: this.size },
     uCameraOpacity: { value: 0.0 },
+    uPlaceholderOpacity: { value: 0.0 },
+    uFaded: { value: 0.0 },
     uCameraBounds: { value: this.cameraBounds },
+    uPlaceholderBounds: { value: this.placeholderBounds },
     uCamera: { value: this.cameraTexture },
+    uPlaceholder: { value: this.placeholderTexture },
+  };
+
+  anims = {
+    cameraOpacity: motionValue(0),
+    canvasBlur: motionValue(0),
+    canvasBackground: motionValue(1),
+    circlePresence: motionValue(0),
+    circlePresenceSpring: motionValue(0),
+    guideVisibility: motionValue(0),
+    guideSetup: motionValue(1),
   };
 
   constructor(public container: HTMLElement) {
@@ -100,10 +140,22 @@ export class MirrorCanvas {
 
     this.initScene();
 
+    this.anims.canvasBlur.on("change", (latest) => {
+      this.gl.canvas.style.willChange = "filter";
+      this.gl.canvas.style.filter = `blur(${latest}px)`;
+    });
+    this.anims.canvasBlur.set(20);
+
+    this.setupPlaceholderVideo();
+
     this.onDispose(() => {
       cancelAnimationFrame(this.raf);
       this.gl.canvas.remove();
       ro.disconnect();
+    });
+
+    window.addEventListener("pointerdown", (e) => {
+      this.placeholderVideo.play().catch(() => {});
     });
   }
 
@@ -125,17 +177,25 @@ export class MirrorCanvas {
 
   private draw() {
     // If a <video> has been set as `image`, this uploads the current frame.
-    if (this.cameraTexture.image) this.cameraTexture.needsUpdate = true;
+    if (this.cameraTexture.image) {
+      this.cameraTexture.needsUpdate = true;
+    } else {
+      this.placeholderTexture.needsUpdate = true;
+    }
 
-    this.updateBounds(this.cameraSize, this.cameraBounds);
+    this.updateBounds(this.cameraSize, this.cameraBounds, true);
+    this.updateBounds(this.placeholderSize, this.placeholderBounds);
 
     this.renderer.render({ scene: this.scene });
 
     this.drawOverlay();
-    this.drawDebug();
+    // this.drawDebug();
   }
 
   private frame = (t: number) => {
+    this.uniforms.uCameraOpacity.value = this.anims.cameraOpacity.get();
+    this.uniforms.uFaded.value = this.anims.canvasBackground.get();
+
     this.time = t;
     this.draw();
     this.raf = requestAnimationFrame(this.frame);
@@ -151,8 +211,6 @@ export class MirrorCanvas {
     this.cameraSize.set(0, 0);
     this.cameraBounds.set(0, 0, 0, 0);
 
-    this.uniforms.uCameraOpacity.value = 0;
-
     // animate(
     //   this.shader!.uniforms.uCameraOpacity as { value: number },
     //   {
@@ -164,6 +222,52 @@ export class MirrorCanvas {
     // );
   }
 
+  setupPlaceholderVideo() {
+    const video = this.placeholderVideo;
+    video.autoplay = true;
+    video.muted = true;
+    video.loop = true;
+
+    Object.assign(video.style, {
+      position: "absolute",
+      top: "0",
+    });
+
+    const texture = this.placeholderTexture;
+
+    video.addEventListener("loadedmetadata", () => {
+      texture.image = video;
+      texture.needsUpdate = true;
+      texture.width = video.videoWidth;
+      texture.height = video.videoHeight;
+      this.cameraSize.set(video.videoWidth, video.videoHeight);
+
+      const gl = this.gl;
+      texture.minFilter = gl.LINEAR;
+      texture.magFilter = gl.LINEAR;
+      texture.wrapS = gl.CLAMP_TO_EDGE;
+      texture.wrapT = gl.CLAMP_TO_EDGE;
+
+      this.placeholderSize.set(video.videoWidth, video.videoHeight);
+      this.updateBounds(this.placeholderSize, this.placeholderBounds);
+
+      animate(
+        this.uniforms.uPlaceholderOpacity,
+        { value: 1 },
+        {
+          duration: 1,
+          ease: "easeInOut",
+        }
+      );
+
+      // this.uniforms.uPlaceholderAspect.value =
+      //   video.videoWidth / video.videoHeight;
+    });
+
+    video.src = "/background.mp4";
+    video.play().catch(() => {});
+  }
+
   async setCameraVideo(video: HTMLVideoElement) {
     // Optional: keep it visible for debugging
     Object.assign(video.style, {
@@ -172,7 +276,7 @@ export class MirrorCanvas {
       right: "0",
       width: "200px",
     });
-    document.body.appendChild(video);
+    // document.body.appendChild(video);
     const texture = this.cameraTexture;
 
     texture.image = video;
@@ -187,20 +291,68 @@ export class MirrorCanvas {
     texture.wrapS = gl.CLAMP_TO_EDGE;
     texture.wrapT = gl.CLAMP_TO_EDGE;
 
+    animate(this.anims.cameraOpacity, 1, {
+      duration: 1,
+      ease: "easeInOut",
+    });
+
     // Fade in camera
-    animate(
-      this.uniforms.uCameraOpacity,
-      {
-        value: 1,
-      },
-      {
-        duration: 1,
-        ease: "easeInOut",
-      }
-    );
+    // animate(
+    //   this.uniforms.uCameraOpacity,
+    //   {
+    //     value: 1,
+    //   },
+    //   {
+    //     duration: 1,
+    //     ease: "easeInOut",
+    //   }
+    // );
+    // animate(
+    //   this.gl.canvas,
+    //   {
+    //     filter: 'blur(0px)'
+    //   },
+    //   {
+    //     duration: 1,
+    //     ease: "easeInOut",
+    //   }
+    // );
   }
 
-  updateBounds(size: Vec2, bounds: Vec4) {
+  setBackgroundMode(enabled: boolean) {
+    animate(this.anims.canvasBackground, enabled ? 1 : 0, {
+      duration: 2,
+      delay: 0.5,
+      ease: "easeInOut",
+      restDelta: 0.001,
+    });
+
+    animate(this.anims.canvasBlur, enabled ? 10 : 0.001, {
+      duration: 2,
+      delay: 0.5,
+      ease: "easeInOut",
+      restDelta: 0.001,
+    });
+  }
+
+  setGuideVisibility(visible: boolean) {
+    animate(this.anims.guideVisibility, visible ? 1 : 0, {
+      duration: 1,
+      delay: 0.8,
+      ease: "easeInOut",
+      restDelta: 0.001,
+    });
+  }
+
+  setChallengeStarted(started: boolean) {
+    animate(this.anims.guideSetup, started ? 0 : 1, {
+      duration: 1,
+      ease: "easeInOut",
+      restDelta: 0.001,
+    });
+  }
+
+  updateBounds(size: Vec2, bounds: Vec4, isFace?: boolean) {
     const viewport = this.size;
     const viewportAspect = viewport.x / viewport.y;
     const aspect = size.x / size.y;
@@ -219,10 +371,12 @@ export class MirrorCanvas {
     bounds.w = targetHeight;
 
     // Update the face camera bounds, to the rect from the camera that is within the bounds
-    faceStore.cameraBounds.x = (0 - bounds.x) * (size.x / bounds.z);
-    faceStore.cameraBounds.y = (0 - bounds.y) * (size.y / bounds.w);
-    faceStore.cameraBounds.w = viewport.x * (size.x / bounds.z);
-    faceStore.cameraBounds.h = viewport.y * (size.y / bounds.w);
+    if (isFace) {
+      faceStore.cameraBounds.x = (0 - bounds.x) * (size.x / bounds.z);
+      faceStore.cameraBounds.y = (0 - bounds.y) * (size.y / bounds.w);
+      faceStore.cameraBounds.w = viewport.x * (size.x / bounds.z);
+      faceStore.cameraBounds.h = viewport.y * (size.y / bounds.w);
+    }
   }
 
   resize() {
@@ -235,11 +389,14 @@ export class MirrorCanvas {
   drawOverlay() {
     const ctx = this.overlayCtx;
     ctx.clearRect(0, 0, ctx.canvas.width, ctx.canvas.height);
-    if (faceStore.hasFace || !cameraState.mediaStream) {
+    if (!cameraState.mediaStream) {
       return;
     }
 
+    const opacity = this.anims.guideVisibility.get();
+
     ctx.save();
+    ctx.globalAlpha = opacity;
 
     const faceCircleSize = faceStore.faceBoxSize;
 
@@ -269,12 +426,14 @@ export class MirrorCanvas {
       const x = Math.cos(angle) * rx + this.size.x / 2;
       const y = Math.sin(angle) * ry + this.size.y / 2;
 
-      const errorAmount =
+      const errorAmount = Math.max(
+        0,
         1 -
-        Math.hypot(
-          Math.sin(angle) - Math.sin(faceAngle) * faceDistance,
-          Math.cos(angle) - Math.cos(faceAngle) * faceDistance
-        );
+          Math.hypot(
+            Math.sin(angle + Math.PI) - Math.sin(faceAngle) * faceDistance,
+            Math.cos(angle + Math.PI) - Math.cos(faceAngle) * faceDistance
+          )
+      );
 
       // const offset =
       //   Math.sin((i / numPills) * Math.PI * 4 + (this.time / 1000) * 2) * 10;
@@ -282,12 +441,28 @@ export class MirrorCanvas {
       const length = errorAmount * 20;
       ctx.lineWidth = (circumference / numPills) * 0.5;
       ctx.lineCap = "round";
-      ctx.strokeStyle = "rgba(255,0,0,1)";
+      ctx.strokeStyle = "rgba(255,255,255,1)";
+      ctx.globalAlpha = opacity * errorAmount;
       ctx.beginPath();
       ctx.moveTo(x + Math.cos(angle) * offset, y + Math.sin(angle) * offset);
       ctx.lineTo(x + Math.cos(angle) * length, y + Math.sin(angle) * length);
       ctx.stroke();
     }
+
+    ctx.globalAlpha = opacity * this.anims.guideSetup.get();
+    ctx.strokeStyle = "white";
+    ctx.lineWidth = 1;
+    ctx.beginPath();
+    ctx.ellipse(
+      this.size.x / 2,
+      this.size.y / 2,
+      faceCircleSize.width / 2,
+      faceCircleSize.height / 2,
+      0,
+      0,
+      Math.PI * 2
+    );
+    ctx.stroke();
 
     ctx.restore();
   }

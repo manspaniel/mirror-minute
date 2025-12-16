@@ -95,6 +95,7 @@ function createFaceStore() {
     modelsLoaded: false,
     modelsFailed: false,
     hasFace: false,
+    hasRun: false,
     faceWarnings: [] as FaceWarningType[],
     setHasFace(value: boolean) {
       return value;
@@ -153,9 +154,14 @@ function createFaceStore() {
       store.hasFace = false;
       return;
     }
+
     const result = await detectSingleFace(cameraState.video).withFaceLandmarks(
       true
     );
+
+    if (result) {
+      store.hasRun = true;
+    }
 
     if (!result?.landmarks) {
       store.hasFace = false;
@@ -259,7 +265,15 @@ function createFaceStore() {
   }
 
   loadModels()
-    .then(() => {
+    .then(async () => {
+      const dummyCanvas = document.createElement("canvas");
+      dummyCanvas.width = 1000;
+      dummyCanvas.height = 1000;
+      const result =
+        await detectSingleFace(dummyCanvas).withFaceLandmarks(true);
+      console.log("Inital model test result:", result);
+    })
+    .then(async () => {
       store.modelsLoaded = true;
     })
     .catch((err) => {
@@ -287,7 +301,7 @@ export function FaceStateManager() {
     let size = 0;
 
     if (windowSize.width > windowSize.height) {
-      size = Math.min(windowSize.height * 0.6, windowSize.width * 0.5);
+      size = Math.min(windowSize.height * 0.5, windowSize.width * 0.5);
     } else {
       size = Math.min(windowSize.width * 0.8, windowSize.height * 0.5);
     }
