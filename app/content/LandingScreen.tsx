@@ -3,6 +3,7 @@ import { useEffect, useRef, useState } from "react";
 import { appState, useAppState } from "~/state/app-state";
 import { Button } from "~/ui/Button";
 import { BURST, DIAMOND } from "~/ui/svgs";
+import { useIsMobile } from "~/utils/useIsMobile";
 
 export function LandingScreen() {
   const app = useAppState();
@@ -26,6 +27,8 @@ export function LandingScreen() {
     );
     return () => abort.abort();
   }, []);
+
+  const isMobile = useIsMobile();
 
   const breatheRef = useRef<HTMLDivElement>(null!);
 
@@ -157,7 +160,7 @@ export function LandingScreen() {
       {/* Splash */}
       {state.step === "splash" && (
         <div className="fixed inset-0 flex items-center text-indigo-950">
-          <div className="absolute bottom-0 left-0 right-0 flex items-center justify-center mb-8 text-md font-semibold">
+          <div className="absolute bottom-0 left-0 right-0 flex items-center justify-center mb-8 text-xs md:text-md font-semibold">
             <a
               href="https://laughlines.com.au"
               target="_blank"
@@ -167,7 +170,11 @@ export function LandingScreen() {
                 initial={{ width: 0 }}
                 animate={{
                   width: "9.5em",
-                  transition: { duration: 1, ease: "easeInOut", delay: 3.3 },
+                  transition: {
+                    duration: 1,
+                    ease: "easeInOut",
+                    delay: isMobile ? 10 : 3.3,
+                  },
                 }}
                 exit={{ width: 0 }}
                 className="font-sans uppercase leading-[1em] mask-[linear-gradient(90deg,black_0%,black_calc(100%-1em),transparent_100%)] overflow-hidden whitespace-nowrap"
@@ -189,7 +196,11 @@ export function LandingScreen() {
                 animate={{
                   opacity: 1,
                   scale: 1,
-                  transition: { duration: 0.3, ease: "easeInOut", delay: 3 },
+                  transition: {
+                    duration: 0.3,
+                    ease: "easeInOut",
+                    delay: isMobile ? 10 : 3.3,
+                  },
                 }}
                 exit={{ opacity: 0, scale: 0.5 }}
               >
@@ -223,12 +234,12 @@ export function LandingScreen() {
             </svg>
           </div>
 
-          <div className="flex lg:flex-row lg:justify-between lg:items-center lg:w-[80vw] mx-auto">
+          <div className="flex md:flex-row md:justify-between md:items-center md:w-[80vw] mx-auto">
             <motion.div
               initial={{ opacity: 0 }}
               animate={{ opacity: 1, transition: { duration: 0.8 } }}
               exit={{ opacity: 0 }}
-              className="text-balance font-serif text-[2.5vw] leading-[1] flex flex-col gap-[1em] w-[10em]"
+              className="text-balance font-serif text-[2.5vw] leading-[1] flex-col gap-[1em] w-[10em] hidden md:flex"
             >
               <p>
                 For one minute, there's nothing to fix, perform or hide from.
@@ -237,21 +248,21 @@ export function LandingScreen() {
                 This mirror doesn’t want your good side —it wants your honesty.
               </p>
             </motion.div>
-            <div className="flex text-center flex-col w-[50%] gap-6">
-              <motion.div className="flex text-[3.5vw] leading-[1.2] text-center items-center flex-col">
+            <div className="flex text-center flex-col md:w-[50%] gap-6">
+              <motion.div className="flex text-[6.5vw] md:text-[3.5vw] leading-[1.2] text-center items-center flex-col">
                 <motion.div
                   initial={{ opacity: 0, scale: 0.95 }}
                   animate={{
                     opacity: 1,
                     scale: 1,
                     transition: {
-                      delay: 1.5,
+                      delay: isMobile ? 1 : 1.5,
                       duration: 0.8,
                       restDelta: 0.01,
                       ease: "anticipate",
                     },
                   }}
-                  exit={{ opacity: 0 }}
+                  exit={{ opacity: 0, scale: 0.9 }}
                   className="font-serif will-change-transform"
                 >
                   Welcome to the
@@ -262,13 +273,13 @@ export function LandingScreen() {
                     opacity: 1,
                     scale: 1,
                     transition: {
-                      delay: 2,
+                      delay: isMobile ? 1.5 : 2,
                       duration: 0.8,
                       restDelta: 0.01,
                       ease: "anticipate",
                     },
                   }}
-                  exit={{ opacity: 0 }}
+                  exit={{ opacity: 0, scale: 0.9 }}
                   className="font-sans uppercase text-[0.9em] will-change-transform relative"
                 >
                   Mirror Minute
@@ -278,9 +289,9 @@ export function LandingScreen() {
                       rotate: "0",
                       scale: 1,
                       opacity: 1,
-                      transition: { delay: 2.8 },
+                      transition: { delay: isMobile ? 1.9 : 2.8 },
                     }}
-                    exit={{ scale: 0.5, opacity: 0 }}
+                    exit={{ scale: 0, opacity: 0 }}
                     className="absolute left-[-1.1em] top-[-0.8em] size-[1em]"
                   >
                     {DIAMOND}
@@ -291,14 +302,50 @@ export function LandingScreen() {
                       rotate: "0",
                       scale: 1,
                       opacity: 1,
-                      transition: { delay: 3.1 },
+                      transition: { delay: isMobile ? 2.1 : 3.1 },
                     }}
-                    exit={{ scale: 0.5, opacity: 0 }}
+                    exit={{ scale: 0, opacity: 0 }}
                     className="absolute left-[101%] bottom-[5%] size-[2em]"
                   >
                     {BURST}
                   </motion.div>
                 </motion.div>
+              </motion.div>
+              <motion.div className="flex md:hidden mx-auto w-[80vw] text-left text-balance gap-5 text-[4vw] leading-none relative z-10">
+                <motion.p
+                  initial={{ opacity: 0, scale: 0.95 }}
+                  animate={{
+                    opacity: 1,
+                    scale: 1,
+                    transition: {
+                      delay: isMobile ? 3.5 : 2,
+                      duration: 0.8,
+                      restDelta: 0.01,
+                      ease: "anticipate",
+                    },
+                  }}
+                  exit={{ opacity: 0 }}
+                >
+                  For one minute, there's nothing to fix, perform or hide from.
+                </motion.p>
+                <motion.p
+                  initial={{ opacity: 0, scale: 0.95 }}
+                  animate={{
+                    opacity: 1,
+                    scale: 1,
+                    transition: {
+                      delay: isMobile ? 5.5 : 2.5,
+                      duration: 0.8,
+                      restDelta: 0.01,
+                      ease: "anticipate",
+                    },
+                  }}
+                  exit={{ opacity: 0 }}
+                  className="pb-4"
+                >
+                  This mirror doesn’t want your good side —it wants your
+                  honesty.
+                </motion.p>
               </motion.div>
               <motion.div
                 initial={{ opacity: 0, scale: 0.95 }}
@@ -306,7 +353,7 @@ export function LandingScreen() {
                   opacity: 1,
                   scale: 1,
                   transition: {
-                    delay: 2.5,
+                    delay: isMobile ? 7.5 : 2.5,
                     duration: 0.8,
                     restDelta: 0.01,
                     ease: "anticipate",
