@@ -227,6 +227,7 @@ export class MirrorCanvas {
     video.autoplay = true;
     video.muted = true;
     video.loop = true;
+    video.playsInline = true;
 
     Object.assign(video.style, {
       position: "absolute",
