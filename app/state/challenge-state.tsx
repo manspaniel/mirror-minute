@@ -1,12 +1,11 @@
+import { useInterval } from "usehooks-ts";
 import { proxy, subscribe, useSnapshot } from "valtio";
 import { subscribeKey } from "valtio/utils";
-import { faceStore } from "./face-state";
-import { useInterval } from "usehooks-ts";
 import { useAppState } from "./app-state";
 import { useCameraState } from "./camera-state";
-import { useEffect } from "react";
+import { faceStore } from "./face-state";
 
-const CHALLENGE_DURATION = 10 * 1000;
+const CHALLENGE_DURATION = 20 * 1000;
 
 function createChallengeState() {
   const store = proxy({
