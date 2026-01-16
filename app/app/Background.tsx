@@ -53,6 +53,11 @@ export function Background() {
   }, [challenge.running, challenge.timeRemaining]);
 
   useEffect(() => {
+    if (appState.screen === "complete") {
+    }
+  }, [appState.screen]);
+
+  useEffect(() => {
     if (!mirror) return;
     if (faceState.faceWarnings.length > 0) {
       mirror.setChallengeStarted(false);

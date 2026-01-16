@@ -117,11 +117,11 @@ export function LandingScreen() {
               data-look-label
               style={{ transform: "scale(1.2)" }}
             >
-              Look at{" "}
+              Can you look at{" "}
               <span className="inline-flex relative">
                 yourself {YOURSELF_VECTOR}
-              </span>
-              .
+              </span>{" "}
+              for 60 seconds?
             </div>
           </div>
 

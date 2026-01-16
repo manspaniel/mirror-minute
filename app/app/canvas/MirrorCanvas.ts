@@ -355,6 +355,24 @@ export class MirrorCanvas {
     });
   }
 
+  setChallengeComplete() {
+    animate(this.anims.guideSetup, 0, {
+      duration: 1,
+      ease: "easeInOut",
+      restDelta: 0.001,
+    });
+    animate(this.anims.cameraOpacity, 0, {
+      duration: 1,
+      ease: "easeInOut",
+      restDelta: 0.001,
+    });
+    animate(this.anims.canvasBackground, 0, {
+      duration: 1,
+      ease: "easeInOut",
+      restDelta: 0.001,
+    });
+  }
+
   updateBounds(size: Vec2, bounds: Vec4, isFace?: boolean) {
     const viewport = this.size;
     const viewportAspect = viewport.x / viewport.y;
