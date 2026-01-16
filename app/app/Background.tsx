@@ -6,6 +6,7 @@ import { subscribe } from "valtio";
 import { useAnimationFrame, useMotionValueEvent } from "motion/react";
 import { useChallengeState } from "~/state/challenge-state";
 import { useAppState } from "~/state/app-state";
+import { shareStore } from "~/state/share-state";
 
 export function Background() {
   const camera = useCameraState();
@@ -33,15 +34,34 @@ export function Background() {
   }, [mirror, appState.screen]);
 
   useEffect(() => {
+    async function checkCapture() {
+      const percent = challenge.timeRemaining / challenge.totalDuration;
+      const imagesTaken = shareStore.images.length;
+      const targetImageCount = 3;
+      if (
+        percent <= (targetImageCount - imagesTaken) / targetImageCount &&
+        challenge.running
+      ) {
+        const image = await mirror.captureImage();
+        if (image) {
+          shareStore.images.push(image);
+          console.log("Captured image", image, "at", percent, "progress");
+        }
+      }
+    }
+    checkCapture();
+  }, [challenge.running, challenge.timeRemaining]);
+
+  useEffect(() => {
     if (!mirror) return;
     if (faceState.faceWarnings.length > 0) {
       mirror.setChallengeStarted(false);
-    } else if (challenge.started) {
+    } else if (challenge.running) {
       mirror.setChallengeStarted(true);
     } else {
       mirror.setChallengeStarted(false);
     }
-  }, [mirror, challenge.started, faceState.faceWarnings]);
+  }, [mirror, challenge.running, faceState.faceWarnings]);
 
   useEffect(() => {
     if (!mirror) return;

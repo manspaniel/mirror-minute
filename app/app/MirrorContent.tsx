@@ -2,8 +2,10 @@ import { AnimatePresence, motion } from "motion/react";
 import { useEffect, useState, type ReactNode } from "react";
 import { useAppState } from "~/state/app-state";
 import { useCameraState } from "~/state/camera-state";
-import { useChallengeState } from "~/state/challenge-state";
+import { challengeState, useChallengeState } from "~/state/challenge-state";
 import { useFaceState } from "~/state/face-state";
+import { shareStore } from "~/state/share-state";
+import { useEscape } from "~/utils/useEscape";
 
 export function MirrorContent() {
   return (
@@ -18,6 +20,13 @@ export function ChallengeOverlay() {
   const challenge = useChallengeState();
   const appState = useAppState();
   const cameraState = useCameraState();
+
+  useEscape(() => {
+    if (challengeState.running) {
+      appState.completeChallenge();
+      challengeState.timeElapsed = challenge.totalDuration;
+    }
+  });
 
   const [enabled, setEnabled] = useState(false);
 
@@ -57,12 +66,13 @@ export function ChallengeOverlay() {
   let label = null as ReactNode;
   let instructions = "";
   let challengeDisplay = null as ReactNode;
+  let finalSeconds = "" as string;
 
   if (warningMessage) {
     label = <div>{warningMessage}</div>;
     instructions = warningNotes;
   } else if (
-    !challenge.started &&
+    !challenge.running &&
     challenge.holdStillFor > 0 &&
     challenge.faceCurrentlyCentered &&
     appState.screen === "challenge" &&
@@ -75,7 +85,7 @@ export function ChallengeOverlay() {
     );
   }
 
-  if (challenge.started && enabled) {
+  if (challenge.running && enabled) {
     const remaining = Math.max(0, challenge.timeRemaining);
     const minutes = Math.floor(remaining / 60000);
     const seconds = Math.floor((remaining % 60000) / 1000);
@@ -85,6 +95,10 @@ export function ChallengeOverlay() {
           {`${minutes}:${seconds.toString().padStart(2, "0")}`}
         </div>
       );
+    }
+    if (remaining <= 3000 && remaining > 0) {
+      finalSeconds = Math.ceil(remaining / 1000).toString();
+      challengeDisplay = null;
     }
   }
 
@@ -100,7 +114,7 @@ export function ChallengeOverlay() {
         <motion.div
           animate={{
             opacity:
-              faceState.hasFace && (!!label || !challenge.started) ? 1 : 0,
+              faceState.hasFace && (!!label || !challenge.running) ? 1 : 0,
           }}
           className="absolute inset-0 rounded-full"
         ></motion.div>
@@ -139,7 +153,8 @@ export function ChallengeOverlay() {
           )}
         </AnimatePresence>
       </div>
-      {/* Countdown */}
+
+      {/* Main Countdown */}
       <div className="absolute top-0 left-0 flex items-center justify-center text-center flex-col gap-2 p-8 pointer-events-none">
         <AnimatePresence mode="wait">
           {challengeDisplay ? (
@@ -149,6 +164,23 @@ export function ChallengeOverlay() {
               exit={{ opacity: 0, filter: "blur(10px)", scale: 0.8 }}
             >
               {challengeDisplay}
+            </motion.div>
+          ) : null}
+        </AnimatePresence>
+      </div>
+
+      {/* Final countdown */}
+      <div className="absolute inset-0 flex items-center justify-center text-center flex-col gap-2 p-8 pointer-events-none text-white text-7xl">
+        <AnimatePresence mode="popLayout">
+          {finalSeconds ? (
+            <motion.div
+              initial={{ opacity: 0, filter: "blur(0px)", scale: 0.0 }}
+              animate={{ opacity: 1, filter: "blur(0px)", scale: 1 }}
+              exit={{ opacity: 0, filter: "blur(10px)", scale: 1.2 }}
+              transition={{ duration: 0.3 }}
+              key={finalSeconds}
+            >
+              {finalSeconds}
             </motion.div>
           ) : null}
         </AnimatePresence>

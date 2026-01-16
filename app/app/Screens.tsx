@@ -1,7 +1,10 @@
 import { AnimatePresence, motion } from "motion/react";
 import { type ReactNode } from "react";
 import { CameraAccess } from "~/content/CameraAccess";
+import { CompletionScreen } from "~/content/CompletionScreen";
 import { LandingScreen } from "~/content/LandingScreen";
+import { ShareScreen } from "~/content/ShareScreen";
+import { SummaryScreen } from "~/content/SummaryScreen";
 import { ModalScreen } from "~/layouts/ModalScreen";
 import { appState, useAppState } from "~/state/app-state";
 import { useCameraState } from "~/state/camera-state";
@@ -59,6 +62,24 @@ export function Screens() {
       </ModalScreen>
     );
   } else if (state.screen === "challenge") {
+  } else if (state.screen === "complete") {
+    screenContent = (
+      <ModalScreen key="completeScreen">
+        <CompletionScreen />
+      </ModalScreen>
+    );
+  } else if (state.screen === "summary") {
+    screenContent = (
+      <ModalScreen key="summaryScreen">
+        <SummaryScreen />
+      </ModalScreen>
+    );
+  } else if (state.screen === "share") {
+    screenContent = (
+      <ModalScreen key="shareScreen">
+        <ShareScreen />
+      </ModalScreen>
+    );
   }
 
   return (

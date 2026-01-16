@@ -3,6 +3,7 @@ import { useEffect, useRef, useState } from "react";
 import { appState, useAppState } from "~/state/app-state";
 import { Button } from "~/ui/Button";
 import { BURST, DIAMOND } from "~/ui/svgs";
+import { useEscape } from "~/utils/useEscape";
 import { useIsMobile } from "~/utils/useIsMobile";
 
 export function LandingScreen() {
@@ -12,21 +13,9 @@ export function LandingScreen() {
     step: "breathe" as "breathe" | "splash",
   });
 
-  useEffect(() => {
-    const abort = new AbortController();
-    window.addEventListener(
-      "keydown",
-      (e) => {
-        if (e.key === "Escape") {
-          appState.dismissLanding();
-        }
-      },
-      {
-        signal: abort.signal,
-      }
-    );
-    return () => abort.abort();
-  }, []);
+  useEscape(() => {
+    appState.dismissLanding();
+  });
 
   const isMobile = useIsMobile();
 

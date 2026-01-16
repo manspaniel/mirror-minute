@@ -2,7 +2,13 @@ import { proxy, useSnapshot } from "valtio";
 
 function createAppState() {
   const store = proxy({
-    screen: "landing" as "landing" | "camera" | "challenge" | "complete",
+    screen: "landing" as
+      | "landing"
+      | "camera"
+      | "challenge"
+      | "complete"
+      | "summary"
+      | "share",
     dismissLanding() {
       store.screen = "camera";
     },
@@ -11,6 +17,15 @@ function createAppState() {
     },
     completeChallenge() {
       store.screen = "complete";
+    },
+    dismissCompletion() {
+      store.screen = "summary";
+    },
+    openShare() {
+      store.screen = "share";
+    },
+    closeShare() {
+      store.screen = "summary";
     },
   });
 

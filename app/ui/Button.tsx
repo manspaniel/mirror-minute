@@ -4,11 +4,13 @@ import { Spinner } from "./Spinner";
 
 type Props = ComponentProps<"button"> & {
   loading?: boolean;
+  variant?: "default" | "dark" | "light";
 };
 
 export function Button(props: Props) {
   const styles = buttonStyles({
     loading: props.loading ? true : false,
+    variant: props.variant ?? "default",
   });
 
   return (
@@ -26,9 +28,9 @@ export const buttonStyles = tv({
     "group/button",
     "inline-flex rounded-full px-10 py-3 items-center justify-center relative",
     "font-sans uppercase text-[12px] leading-tight tracking-wider",
-    "bg-indigo-500 text-white shadow-xl shadow-black/15 cursor-pointer transition-all ease-in-out duration-300",
-    "lg:hover:bg-indigo-600 lg:hover:scale-[1.02]",
-    "active:translate-y-[0.2em] active:bg-indigo-600 active:duration-75",
+    "shadow-xl shadow-black/15 cursor-pointer transition-all ease-in-out duration-300",
+    " lg:hover:scale-[1.02]",
+    "active:translate-y-[0.2em] active:duration-75",
   ],
   slots: {
     label:
@@ -43,5 +45,16 @@ export const buttonStyles = tv({
         spinner: "opacity-100 scale-100",
       },
     },
+    variant: {
+      default:
+        "bg-indigo-500 text-white lg:hover:bg-indigo-600 active:bg-indigo-600",
+      dark: "bg-indigo-950 text-white lg:hover:bg-indigo-900 active:bg-indigo-900",
+      light:
+        "bg-indigo-50 text-indigo-950 lg:hover:bg-indigo-100 active:bg-indigo-100",
+    },
+  },
+  defaultVariants: {
+    loading: false,
+    variant: "default",
   },
 });

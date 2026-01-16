@@ -6,11 +6,11 @@ import { useAppState } from "./app-state";
 import { useCameraState } from "./camera-state";
 import { useEffect } from "react";
 
-const CHALLENGE_DURATION = 60 * 1000;
+const CHALLENGE_DURATION = 10 * 1000;
 
 function createChallengeState() {
   const store = proxy({
-    started: false,
+    running: false,
     timeElapsed: 0,
     timeRemaining: 0,
     totalDuration: CHALLENGE_DURATION,
@@ -23,19 +23,19 @@ function createChallengeState() {
   });
 
   subscribeKey(store, "faceCurrentlyCentered", () => {
-    if (!store.started && !store.faceCurrentlyCentered) {
+    if (!store.running && !store.faceCurrentlyCentered) {
       store.holdStillFor = 3000;
     }
   });
 
   subscribeKey(store, "holdStillFor", () => {
-    if (store.holdStillFor <= 0 && !store.started) {
-      store.started = true;
+    if (store.holdStillFor <= 0 && !store.running) {
+      store.running = true;
     }
   });
 
   subscribeKey(store, "invalidFor", () => {
-    if (store.invalidFor > 5000 && store.started) {
+    if (store.invalidFor > 5000 && store.running) {
       store.paused = true;
     } else {
       store.paused = false;
@@ -68,7 +68,7 @@ export function ChallengeManager() {
   // }, [challengeScreenActive]);
 
   useInterval(() => {
-    const preparing = appState.screen === "challenge" && !store.started;
+    const preparing = appState.screen === "challenge" && !store.running;
     if (!preparing) return;
 
     if (store.faceCurrentlyCentered && !store.paused) {
@@ -76,7 +76,7 @@ export function ChallengeManager() {
     } else {
       store.holdStillFor = 3000;
     }
-    if (store.started && store.faceCurrentlyCentered) {
+    if (store.running && store.faceCurrentlyCentered) {
       store.invalidFor += 200;
     } else {
       store.invalidFor = 0;
@@ -84,9 +84,13 @@ export function ChallengeManager() {
   }, 200);
 
   useInterval(() => {
-    if (store.started) {
+    if (store.running) {
       store.timeElapsed += 1000;
       store.timeRemaining = Math.ceil(store.totalDuration) - store.timeElapsed;
+      if (store.timeRemaining <= 0 && store.timeElapsed > 1000) {
+        store.running = false;
+        appState.completeChallenge();
+      }
     }
   }, 1000);
 

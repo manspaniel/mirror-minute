@@ -79,6 +79,7 @@ export class MirrorCanvas {
     generateMipmaps: false,
     flipY: true,
   });
+  cameraVideo?: HTMLVideoElement;
 
   placeholderBounds = new Vec4(0, 0, 0, 0);
   placeholderSize = new Vec2(0, 0);
@@ -280,6 +281,7 @@ export class MirrorCanvas {
     // document.body.appendChild(video);
     const texture = this.cameraTexture;
 
+    this.cameraVideo = video;
     texture.image = video;
     texture.needsUpdate = true;
     texture.width = video.videoWidth;
@@ -527,5 +529,23 @@ export class MirrorCanvas {
     }
 
     ctx.restore();
+  }
+
+  async captureImage(): Promise<HTMLImageElement | void> {
+    if (!this.cameraVideo) return;
+
+    const canvas = document.createElement("canvas");
+    canvas.width = this.cameraSize.x;
+    canvas.height = this.cameraSize.y;
+    const ctx = canvas.getContext("2d")!;
+    ctx.drawImage(this.cameraVideo, 0, 0, canvas.width, canvas.height);
+
+    return new Promise((resolve) => {
+      const img = new Image();
+      img.onload = () => {
+        resolve(img);
+      };
+      img.src = canvas.toDataURL("image/png");
+    });
   }
 }
