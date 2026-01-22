@@ -36,6 +36,7 @@ function createShareStore() {
     includeNote: false,
     permissionToShare: false,
     didUpload: false,
+    shareId: "",
   });
 
   return store;

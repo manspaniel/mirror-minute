@@ -10,6 +10,7 @@ import { useEscape } from "~/utils/useEscape";
 import { useReflectionNote } from "~/utils/useReflectionNote";
 import { ShareImage } from "./ShareImage";
 import { useIsMobile } from "~/utils/useIsMobile";
+import { usePublishImage } from "~/utils/usePublishImage";
 
 export function ShareScreen() {
   useEscape(() => {
@@ -17,6 +18,7 @@ export function ShareScreen() {
   });
 
   const generator = useRef<() => Promise<HTMLCanvasElement>>(null!);
+  const publish = usePublishImage();
 
   const isMobile = useIsMobile();
   const hasNativeShare = useMemo(
@@ -30,6 +32,10 @@ export function ShareScreen() {
     link.download = "mirror-minute-share.png";
     link.href = canvas.toDataURL("image/png");
     link.click();
+
+    if (shareStore.permissionToShare) {
+      publish.publish(canvas);
+    }
   }
 
   async function share() {
@@ -51,6 +57,10 @@ export function ShareScreen() {
         }
       }
     });
+
+    if (shareStore.permissionToShare) {
+      publish.publish(canvas);
+    }
   }
 
   return (
