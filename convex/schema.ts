@@ -7,6 +7,7 @@ export default defineSchema({
     theme: v.string(),
     imageStorageId: v.id("_storage"),
     photoStorageId: v.optional(v.id("_storage")),
+    thumbnailStorageId: v.optional(v.id("_storage")),
     createdAt: v.number(),
     updatedAt: v.number(),
   }),

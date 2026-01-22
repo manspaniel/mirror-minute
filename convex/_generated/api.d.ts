@@ -9,6 +9,7 @@
  */
 
 import type * as shares from "../shares.js";
+import type * as thumbnails from "../thumbnails.js";
 
 import type {
   ApiFromModules,
@@ -18,6 +19,7 @@ import type {
 
 declare const fullApi: ApiFromModules<{
   shares: typeof shares;
+  thumbnails: typeof thumbnails;
 }>;
 
 /**
