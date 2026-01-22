@@ -437,7 +437,7 @@ export function ShareImage(props: Props) {
   if (props.generateRef) {
     props.generateRef.current = async () => {
       const canvas = await html2canvas(ref.current, {
-        scale: 5,
+        scale: 1,
         backgroundColor: theme.bg,
       });
       return cropImage(canvas, EXPORT_WIDTH, EXPORT_HEIGHT);
