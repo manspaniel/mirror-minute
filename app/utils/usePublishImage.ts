@@ -49,29 +49,27 @@ async function publishAsync(
 
   if (!sharedImage) return;
 
-  // 1. Upload the generated canvas image
-  const imageUploadUrl = await mutations.generateUploadUrl();
-  const imageBlob = await canvasToBlob(sharedImage);
-  const imageResponse = await fetch(imageUploadUrl, {
-    method: "POST",
-    headers: { "Content-Type": "image/png" },
-    body: imageBlob,
-  });
-  const { storageId: imageStorageId } = await imageResponse.json();
-
-  // 2. Upload original photo if exists
-  let photoStorageId: Id<"_storage"> | undefined;
-  if (info.photo) {
-    const photoUploadUrl = await mutations.generateUploadUrl();
-    const photoBlob = await imageToBlob(info.photo);
-    const photoResponse = await fetch(photoUploadUrl, {
+  // Upload both images in parallel
+  const uploadImage = async (blob: Blob): Promise<Id<"_storage">> => {
+    const uploadUrl = await mutations.generateUploadUrl();
+    const response = await fetch(uploadUrl, {
       method: "POST",
       headers: { "Content-Type": "image/png" },
-      body: photoBlob,
+      body: blob,
     });
-    const result = await photoResponse.json();
-    photoStorageId = result.storageId;
-  }
+    const { storageId } = await response.json();
+    return storageId;
+  };
+
+  // Prepare blobs
+  const imageBlob = await canvasToBlob(sharedImage);
+  const photoBlob = info.photo ? await imageToBlob(info.photo) : null;
+
+  // Upload in parallel
+  const [imageStorageId, photoStorageId] = await Promise.all([
+    uploadImage(imageBlob),
+    photoBlob ? uploadImage(photoBlob) : Promise.resolve(undefined),
+  ]);
 
   // 3. Create or update share
   const shareData = {
