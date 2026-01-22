@@ -23,11 +23,11 @@ export function LandingScreen() {
 
   async function breatheAnim() {
     const breatheLabel = breatheRef.current.querySelector(
-      "[data-breathe-label]"
+      "[data-breathe-label]",
     )!;
     const lookLabel = breatheRef.current.querySelector("[data-look-label]")!;
     const lookCircle = breatheRef.current.querySelector(
-      "[data-yourself-circle]"
+      "[data-yourself-circle]",
     )!;
     const rings = breatheRef.current.querySelectorAll("[data-breathe-ring]");
 
@@ -59,7 +59,7 @@ export function LandingScreen() {
         [
           [lookCircle, lookLabel],
           { strokeDashoffset: "-400px", opacity: 0 },
-          { duration: 0.7, delay: 0.7, ease: "easeOut" },
+          { duration: 0.7, delay: 1.2, ease: "easeOut" },
         ],
       ]),
       ...Array.from(rings).map((ring, index) => {
@@ -113,7 +113,7 @@ export function LandingScreen() {
           </div>
           <div className="absolute inset-0 flex items-center justify-center">
             <div
-              className="text-indigo-950 text-3xl opacity-0 will-change-transform isolate"
+              className="text-indigo-950 max-md:text-2xl text-3xl opacity-0 will-change-transform isolate max-md:text-center max-md:px-4"
               data-look-label
               style={{ transform: "scale(1.2)" }}
             >

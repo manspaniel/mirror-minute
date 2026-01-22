@@ -45,7 +45,7 @@
 
 html,
 body {
-  @apply bg-bg font-serif;
+  @apply bg-[#f2f2fb] font-serif;
   text-rendering: geometricPrecision;
-  font-variant-ligatures:;
+  font-variant-ligatures: common-ligatures;
 }

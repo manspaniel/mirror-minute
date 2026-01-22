@@ -9,8 +9,8 @@ export function Checkbox(props: Props) {
   return (
     <div
       className={cn(
-        "relative size-6 border border-indigo-300 rounded-md p-px flex items-center cursor-pointer transition-colors duration-200 text-indigo-500",
-        props.checked ? "border-indigo-500" : "bg-transparent"
+        "relative size-6 border border-indigo-300 rounded-md p-px flex items-center cursor-pointer transition-colors duration-200 text-indigo-500 flex-none",
+        props.checked ? "border-indigo-500" : "bg-transparent",
       )}
     >
       <input
@@ -22,7 +22,7 @@ export function Checkbox(props: Props) {
       <div
         className={cn(
           "absolute inset-0 flex items-center justify-center transition-all duration-200",
-          props.checked ? "scale-100 opacity-100" : "scale-0 opacity-0"
+          props.checked ? "scale-100 opacity-100" : "scale-0 opacity-0",
         )}
       >
         <svg

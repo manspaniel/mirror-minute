@@ -44,6 +44,7 @@ void main() {
   vec2 camUv = vec2(vUv.x * uRes.x, vUv.y * uRes.y);
   camUv -= uCameraBounds.xy;
   camUv /= uCameraBounds.zw;
+  camUv.x = 1.0 - camUv.x;
 
   vec2 placeholderUv = vec2(vUv.x * uRes.x, vUv.y * uRes.y);
   placeholderUv -= uPlaceholderBounds.xy;
@@ -259,7 +260,7 @@ export class MirrorCanvas {
         {
           duration: 1,
           ease: "easeInOut",
-        }
+        },
       );
 
       // this.uniforms.uPlaceholderAspect.value =
@@ -431,7 +432,7 @@ export class MirrorCanvas {
     // );
 
     const pitch = faceStore.facing.pitch.get();
-    const yaw = faceStore.facing.yaw.get();
+    const yaw = -faceStore.facing.yaw.get();
 
     const faceAngle = Math.atan2(pitch, yaw);
     const faceDistance = Math.hypot(pitch, yaw);
@@ -452,8 +453,8 @@ export class MirrorCanvas {
         1 -
           Math.hypot(
             Math.sin(angle + Math.PI) - Math.sin(faceAngle) * faceDistance,
-            Math.cos(angle + Math.PI) - Math.cos(faceAngle) * faceDistance
-          )
+            Math.cos(angle + Math.PI) - Math.cos(faceAngle) * faceDistance,
+          ),
       );
 
       // const offset =
@@ -481,7 +482,7 @@ export class MirrorCanvas {
       faceCircleSize.height / 2,
       0,
       0,
-      Math.PI * 2
+      Math.PI * 2,
     );
     ctx.stroke();
 
@@ -498,7 +499,7 @@ export class MirrorCanvas {
     ctx.translate(this.cameraBounds.x, this.cameraBounds.y);
     ctx.scale(
       this.cameraBounds.z / this.cameraSize.x,
-      this.cameraBounds.w / this.cameraSize.y
+      this.cameraBounds.w / this.cameraSize.y,
     );
 
     function drawPath(path: FacePoint[]) {

@@ -5,6 +5,7 @@ import { shareStore } from "~/state/share-state";
 import { Button } from "~/ui/Button";
 import { useEscape } from "~/utils/useEscape";
 import { useIsMobile } from "~/utils/useIsMobile";
+import { useReflectionNote } from "~/utils/useReflectionNote";
 
 export function CompletionScreen() {
   const app = useAppState();
@@ -24,7 +25,7 @@ export function CompletionScreen() {
   async function successAnim() {
     const lookLabel = successRef.current.querySelector("[data-look-label]")!;
     const lookCircle = successRef.current.querySelector(
-      "[data-yourself-circle]"
+      "[data-yourself-circle]",
     )!;
 
     await Promise.all([
@@ -57,6 +58,8 @@ export function CompletionScreen() {
       });
     }
   }, [state.step]);
+
+  const reflection = useReflectionNote(true);
 
   return (
     <>
@@ -150,16 +153,28 @@ export function CompletionScreen() {
                   },
                 }}
                 exit={{ opacity: 0, scale: 0.9 }}
-                className="font-serif uppercase text-[0.9em] will-change-transform relative"
+                className="font-serif uppercase text-[0.9em] will-change-transform relative max-md:text-left"
               >
                 <textarea
-                  className="font-serif text-[6.5vw] md:text-[3.5vw] leading-[1.2] appearance-none bg-transparent placeholder:text-[#B6BDE5] outline-0 resize-none w-full field-sizing-content overflow-visible py-[0.1em] text-center text-pretty placeholder-shown:text-left placeholder-shown:w-[12.5em]"
+                  className="font-serif text-[calc(6.5vw*var(--textScale))] md:text-[calc(3.5vw*var(--textScale))] leading-[1.2] appearance-none bg-transparent placeholder:text-[#B6BDE5] outline-0 resize-none w-full field-sizing-content overflow-visible py-[0.1em] md:text-center text-pretty md:placeholder-shown:text-left md:placeholder-shown:w-[12.5em]"
+                  style={
+                    {
+                      "--textScale": `${1 - (Math.round(reflection.percentageUsed * 3) / 3) * 0.3}`,
+                    } as any
+                  }
+                  defaultValue={reflection.initialValue}
                   onChange={(e) => {
-                    shareStore.note = e.target.value;
+                    reflection.setValue(e.target.value);
                   }}
+                  maxLength={reflection.maxLength}
                   autoFocus
                   placeholder="The mirror minute made me feel..."
                 />
+                {reflection.percentageUsed > 0.2 && (
+                  <div className="w-full text-right text-indigo-950/60 text-xs px-3 py-2">
+                    {reflection.feedbackText}
+                  </div>
+                )}
               </motion.div>
               <motion.div
                 initial={{ opacity: 0, scale: 0.95 }}
@@ -167,7 +182,7 @@ export function CompletionScreen() {
                   opacity: 1,
                   scale: 1,
                   transition: {
-                    delay: isMobile ? 7.5 : 2.5,
+                    delay: isMobile ? 2.5 : 2.5,
                     duration: 0.8,
                     restDelta: 0.01,
                     ease: "anticipate",

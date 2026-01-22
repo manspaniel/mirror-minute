@@ -24,7 +24,7 @@ export function CameraAccess() {
       async () => {
         refresh();
       },
-      { signal: abortCtrl.signal }
+      { signal: abortCtrl.signal },
     );
     refresh();
     return () => abortCtrl.abort();
@@ -154,7 +154,7 @@ export function CameraAccess() {
           {accessControl}
         </motion.div>
       </motion.div>
-      <div className="fixed bottom-4 md:bottom-8 left-2 right-2 text-lg font-serif leading-[1.4]">
+      <div className="fixed bottom-4 md:bottom-8 max-md:p-2 left-2 right-2 text-lg font-serif leading-[1.4]">
         <AnimatePresence mode="wait" propagate>
           <motion.div
             key={instructions}

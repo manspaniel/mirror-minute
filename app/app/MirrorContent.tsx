@@ -23,7 +23,6 @@ export function ChallengeOverlay() {
 
   useEscape(() => {
     if (challengeState.running) {
-      appState.completeChallenge();
       challengeState.timeElapsed = challenge.totalDuration;
     }
   });
@@ -79,7 +78,7 @@ export function ChallengeOverlay() {
     enabled
   ) {
     label = (
-      <div>
+      <div className="tabular-nums">
         Hold still for {Math.ceil(challenge.holdStillFor / 1000)} seconds
       </div>
     );
@@ -91,9 +90,16 @@ export function ChallengeOverlay() {
     const seconds = Math.floor((remaining % 60000) / 1000);
     if (remaining > 0) {
       challengeDisplay = (
-        <div className="text-white font-sans text-6xl tracking-wider leading-[0.8]">
+        <motion.div
+          variants={{
+            running: { scale: 1, opacity: 1, filter: "none" },
+            paused: { scale: 1, opacity: 0.8, filter: "blur(2px)" },
+          }}
+          animate={challenge.paused ? "paused" : "running"}
+          className="text-white font-sans text-6xl tracking-wider leading-[0.8]"
+        >
           {`${minutes}:${seconds.toString().padStart(2, "0")}`}
-        </div>
+        </motion.div>
       );
     }
     if (remaining <= 3000 && remaining > 0) {
@@ -128,7 +134,7 @@ export function ChallengeOverlay() {
               exit={{ opacity: 0 }}
               key={warningMessage}
               transition={{ duration: 0.2 }}
-              className="absolute top-full pt-8 -left-10 -right-10 text-center font-sans text-2xl text-white uppercase"
+              className="absolute top-full pt-8 -left-10 -right-10 text-center font-sans max-md:text-lg text-2xl text-white uppercase"
             >
               {label}
             </motion.div>

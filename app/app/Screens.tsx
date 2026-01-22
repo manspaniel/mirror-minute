@@ -2,11 +2,12 @@ import { AnimatePresence, motion } from "motion/react";
 import { type ReactNode } from "react";
 import { CameraAccess } from "~/content/CameraAccess";
 import { CompletionScreen } from "~/content/CompletionScreen";
+import { FailureScreen } from "~/content/FailureScreen";
 import { LandingScreen } from "~/content/LandingScreen";
 import { ShareScreen } from "~/content/ShareScreen";
 import { SummaryScreen } from "~/content/SummaryScreen";
 import { ModalScreen } from "~/layouts/ModalScreen";
-import { appState, useAppState } from "~/state/app-state";
+import { useAppState } from "~/state/app-state";
 import { useCameraState } from "~/state/camera-state";
 import { useChallengeState } from "~/state/challenge-state";
 import { useFaceState } from "~/state/face-state";
@@ -14,8 +15,6 @@ import { Spinner } from "~/ui/Spinner";
 
 export function Screens() {
   const state = useAppState();
-  const camera = useCameraState();
-  const challenge = useChallengeState();
   const face = useFaceState();
 
   let screenContent: ReactNode = null;
@@ -62,6 +61,12 @@ export function Screens() {
       </ModalScreen>
     );
   } else if (state.screen === "challenge") {
+  } else if (state.screen === "failure") {
+    screenContent = (
+      <ModalScreen key="failureScreen">
+        <FailureScreen />
+      </ModalScreen>
+    );
   } else if (state.screen === "complete") {
     screenContent = (
       <ModalScreen key="completeScreen">

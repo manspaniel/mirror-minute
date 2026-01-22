@@ -6,6 +6,7 @@ function createAppState() {
       | "landing"
       | "camera"
       | "challenge"
+      | "failure"
       | "complete"
       | "summary"
       | "share",
@@ -14,6 +15,9 @@ function createAppState() {
     },
     doneWithCamera() {
       store.screen = "challenge";
+    },
+    failChallenge() {
+      store.screen = "failure";
     },
     completeChallenge() {
       store.screen = "complete";

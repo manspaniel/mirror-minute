@@ -156,7 +156,7 @@ function createFaceStore() {
     }
 
     const result = await detectSingleFace(cameraState.video).withFaceLandmarks(
-      true
+      true,
     );
 
     if (result) {
@@ -198,12 +198,12 @@ function createFaceStore() {
     rawFacing.yaw.set(yaw);
     rawFacing.posX.set((box.x + box.width / 2) / cameraState.video.videoWidth);
     rawFacing.posY.set(
-      (box.y + box.height / 2) / cameraState.video.videoHeight
+      (box.y + box.height / 2) / cameraState.video.videoHeight,
     );
 
     const zoom = Math.max(
       box.width / cameraState.video.videoWidth,
-      box.height / cameraState.video.videoHeight
+      box.height / cameraState.video.videoHeight,
     );
     rawFacing.zoom.set(zoom);
 
@@ -213,14 +213,14 @@ function createFaceStore() {
         Math.min(
           1,
           Math.abs(rawFacing.posX.get() - 0.5) * 2 +
-            Math.abs(rawFacing.posY.get() - 0.5) * 2
-        )
+            Math.abs(rawFacing.posY.get() - 0.5) * 2,
+        ),
     );
     rawFacing.angleValidity.set(
-      Math.abs(rawFacing.pitch.get()) < 0.4 &&
-        Math.abs(rawFacing.yaw.get()) < 0.4
+      Math.abs(rawFacing.pitch.get()) < 0.6 &&
+        Math.abs(rawFacing.yaw.get()) < 0.6
         ? 1
-        : 0
+        : 0,
     );
     // Test if the face box is within the camera bounds
     const isWithinBounds =
@@ -234,7 +234,7 @@ function createFaceStore() {
       (rawFacing.centerValidity.get() +
         rawFacing.angleValidity.get() +
         rawFacing.zoomValidity.get()) /
-        3
+        3,
     );
 
     if (faceStore.facing.angleValidity.get() < 0.5) {
@@ -243,7 +243,7 @@ function createFaceStore() {
     if (faceStore.facing.zoomValidity.get() < 0.5) {
       faceWarnings.push("zoom");
     }
-    if (faceStore.facing.centerValidity.get() < 0.8) {
+    if (faceStore.facing.centerValidity.get() < 0.7) {
       faceWarnings.push("position");
     }
 

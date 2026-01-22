@@ -1,5 +1,5 @@
 import { AnimatePresence, motion } from "motion/react";
-import { useEffect, useRef } from "react";
+import { useEffect, useMemo, useRef } from "react";
 import { appState } from "~/state/app-state";
 import { ColourThemes, shareStore, useShareState } from "~/state/share-state";
 import { Button } from "~/ui/Button";
@@ -7,11 +7,52 @@ import { Checkbox } from "~/ui/Checkbox";
 import { Switch } from "~/ui/Switch";
 import { cn } from "~/utils/tw";
 import { useEscape } from "~/utils/useEscape";
+import { useReflectionNote } from "~/utils/useReflectionNote";
+import { ShareImage } from "./ShareImage";
+import { useIsMobile } from "~/utils/useIsMobile";
 
 export function ShareScreen() {
   useEscape(() => {
     appState.closeShare();
   });
+
+  const generator = useRef<() => Promise<HTMLCanvasElement>>(null!);
+
+  const isMobile = useIsMobile();
+  const hasNativeShare = useMemo(
+    () => !!navigator.canShare && !!navigator.share,
+    [],
+  );
+
+  async function download() {
+    const canvas = await generator.current();
+    const link = document.createElement("a");
+    link.download = "mirror-minute-share.png";
+    link.href = canvas.toDataURL("image/png");
+    link.click();
+  }
+
+  async function share() {
+    const canvas = await generator.current();
+    canvas.toBlob(async (blob) => {
+      if (blob) {
+        const file = new File([blob], "mirror-minute-share.png", {
+          type: "image/png",
+        });
+        try {
+          await navigator.share({
+            files: [file],
+            title: "My Mirror Minute",
+            text: "Check out my Mirror Minute creation!",
+            url: window.location.origin,
+          });
+        } catch (error) {
+          console.error("Error sharing:", error);
+          download();
+        }
+      }
+    });
+  }
 
   return (
     <div className="fixed inset-0">
@@ -23,8 +64,10 @@ export function ShareScreen() {
             animate={{ opacity: 1, scale: 1, filter: "none" }}
             exit={{ opacity: 0, filter: "blur(10px)" }}
             transition={{ duration: 0.5 }}
-            className="bg-indigo-400 aspect-[303/540] flex-none md:h-[80vh]"
-          ></motion.div>
+            className="aspect-[303/540] flex-none md:h-[80vh]"
+          >
+            <ShareImage />
+          </motion.div>
         </div>
         {/* Controls */}
         <motion.div
@@ -35,10 +78,15 @@ export function ShareScreen() {
         >
           <Controls />
           <div className="flex gap-3 mt-8">
-            <Button>Download</Button>
-            <Button>Share</Button>
+            <Button onClick={download}>Download</Button>
+            {hasNativeShare && <Button onClick={share}>Share</Button>}
           </div>
         </motion.div>
+      </div>
+
+      {/* Exportable preview */}
+      <div className="absolute top-0 left-0 pointer-events-none opacity-0">
+        <ShareImage forExport={true} generateRef={generator} />
       </div>
     </div>
   );
@@ -143,7 +191,7 @@ function SelectableImage(props: {
       ref={ref}
       className={cn(
         "w-[72px] aspect-[72/96] rounded-lg border-indigo-200 cursor-pointer border outline-2 outline-offset-2 transition-colors relative flex items-center justify-center",
-        props.selected ? "outline-indigo-500" : "outline-transparent"
+        props.selected ? "outline-indigo-500" : "outline-transparent",
       )}
       onClick={props.onSelect}
     >
@@ -159,16 +207,7 @@ const MAX_NOTE_LENGTH = 200;
 function Reflection() {
   const state = useShareState();
 
-  const charactersRemaining = Math.max(0, MAX_NOTE_LENGTH - state.note.length);
-
-  let characterLabel = "";
-  if (charactersRemaining === MAX_NOTE_LENGTH) {
-    characterLabel = "Max " + MAX_NOTE_LENGTH + " characters";
-  } else if (charactersRemaining === 0) {
-    characterLabel = "No characters remaining";
-  } else {
-    characterLabel = state.note.length + "/" + MAX_NOTE_LENGTH;
-  }
+  const reflection = useReflectionNote();
 
   return (
     <div className="flex flex-col items-start">
@@ -192,18 +231,18 @@ function Reflection() {
             <div className="pt-4">
               <div className="relative border border-indigo-950/20 rounded-xl focus-within:ring-2 focus-within:ring-indigo-500">
                 <textarea
-                  defaultValue={state.note}
                   className="w-full h-24 px-3 py-2 placeholder:text-indigo-950/40 border-none resize-none field-sizing-content outline-indigo-500 font-serif text-lg outline-none"
                   placeholder="The mirror minute made me feel..."
+                  defaultValue={reflection.initialValue}
                   onChange={(e) => {
-                    shareStore.note = e.target.value;
+                    reflection.setValue(e.target.value);
                   }}
-                  maxLength={MAX_NOTE_LENGTH}
+                  maxLength={reflection.maxLength}
                 ></textarea>
                 <div
                   className={"text-indigo-950/60 text-xs px-3 py-2 text-right"}
                 >
-                  {characterLabel}
+                  {reflection.feedbackText}
                 </div>
               </div>
             </div>

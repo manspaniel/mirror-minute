@@ -3,6 +3,7 @@ import { appState } from "~/state/app-state";
 import { Button, buttonStyles } from "~/ui/Button";
 import { BURST, DIAMOND } from "~/ui/svgs";
 import { useEscape } from "~/utils/useEscape";
+import { ShareImage } from "./ShareImage";
 
 export function SummaryScreen() {
   useEscape(() => {
@@ -68,7 +69,7 @@ export function SummaryScreen() {
                 </motion.div>
               </motion.div>
             </motion.div>
-            <div className="flex flex-col items-center justify-center">
+            <div className="flex max-md:mt-10 flex-col items-center justify-center">
               <motion.div
                 initial={{
                   scale: 0.8,
@@ -92,8 +93,10 @@ export function SummaryScreen() {
                   opacity: 0,
                   filter: "blur(20px)",
                 }}
-                className="bg-indigo-400 aspect-[303/540] flex-none max-md:w-[60vw] md:h-[50vh]"
-              ></motion.div>
+                className="aspect-[303/540] flex-none max-md:w-[40vw] md:h-[50vh]"
+              >
+                <ShareImage />
+              </motion.div>
             </div>
             <motion.div
               initial={{ opacity: 0 }}
@@ -150,7 +153,7 @@ export function SummaryScreen() {
 
         {/* Right side/Campaign stuff */}
         <div className="md:w-1/2 min-h-[60vh] bg-[#6357FF] flex items-center justify-center text-white md:pr-10">
-          <div className="flex flex-col max-md:py-10 gap-3 md:justify-between md:h-[80vh] max-w-[80vw] md:max-w-[600px] w-full">
+          <div className="flex flex-col max-md:py-10 gap-3 md:justify-between md:h-[80vh] max-w-[80vw] md:max-w-[500px] w-full">
             {/* Logo */}
             <div className="relative flex items-center justify-center mb-8 text-[5vw] md:text-[2vw] 2xl:text-[35px] font-semibold">
               <span className="flex items-center">
@@ -203,7 +206,7 @@ export function SummaryScreen() {
               initial={{ opacity: 0 }}
               animate={{ opacity: 1, transition: { delay: 1.2 } }}
               exit={{ opacity: 0 }}
-              className="text-xl md:text-4xl flex flex-col gap-[0.8em] text-pretty [text-rendering:optimizeLegibility]"
+              className="text-xl md:text-2xl flex flex-col gap-[0.8em] text-pretty [text-rendering:optimizeLegibility]"
             >
               <p>
                 We're photographing 1000 women around the world make-up free -
@@ -217,16 +220,24 @@ export function SummaryScreen() {
               initial={{ opacity: 0 }}
               animate={{ opacity: 1, transition: { delay: 1.2 } }}
               exit={{ opacity: 0 }}
-              className="flex flex-col items-center gap-4 max-md:pt-10"
+              className="flex flex-col max-md:items-stretch items-center gap-4 max-md:pt-10"
             >
               <a
-                href="#"
+                href="https://laughlines.com.au/"
                 target="_blank"
-                className={buttonStyles({ variant: "light" }).base()}
+                className={buttonStyles({ variant: "light" }).base({
+                  className: "w-full px-2",
+                })}
               >
                 Visit Laugh Lines Website
               </a>
-              <a href="#" className={buttonStyles({ variant: "dark" }).base()}>
+              <a
+                href="https://www.instagram.com/laughlinesproject/"
+                className={buttonStyles({
+                  variant: "dark",
+                  className: "w-full px-2",
+                }).base()}
+              >
                 Follow on Instagram
               </a>
             </motion.div>
