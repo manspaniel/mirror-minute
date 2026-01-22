@@ -226,7 +226,7 @@ export function SummaryScreen() {
                 href="https://laughlines.com.au/"
                 target="_blank"
                 className={buttonStyles({ variant: "light" }).base({
-                  className: "w-full px-2",
+                  className: "max-md:w-full max-md:px-2",
                 })}
               >
                 Visit Laugh Lines Website
@@ -235,7 +235,7 @@ export function SummaryScreen() {
                 href="https://www.instagram.com/laughlinesproject/"
                 className={buttonStyles({
                   variant: "dark",
-                  className: "w-full px-2",
+                  className: "max-md:w-full max-md:px-2",
                 }).base()}
               >
                 Follow on Instagram

@@ -4,6 +4,7 @@ import {
   loadFaceDetectionModel,
   loadFaceLandmarkTinyModel,
   loadTinyFaceDetectorModel,
+  TinyFaceDetectorOptions,
 } from "face-api.js";
 import { MotionValue, motionValue, springValue } from "motion/react";
 import { Vec2 } from "ogl";
@@ -121,9 +122,7 @@ function createFaceStore() {
   });
 
   async function loadModels() {
-    // await loadTinyFaceDetectorModel("/");
-    // await loadFaceLandmarkModel("/");
-    await loadFaceDetectionModel("/");
+    await loadTinyFaceDetectorModel("/");
     await loadFaceLandmarkTinyModel("/");
   }
 
@@ -155,9 +154,10 @@ function createFaceStore() {
       return;
     }
 
-    const result = await detectSingleFace(cameraState.video).withFaceLandmarks(
-      true,
-    );
+    const result = await detectSingleFace(
+      cameraState.video,
+      new TinyFaceDetectorOptions({}),
+    ).withFaceLandmarks(true);
 
     if (result) {
       store.hasRun = true;
@@ -269,9 +269,11 @@ function createFaceStore() {
       const dummyCanvas = document.createElement("canvas");
       dummyCanvas.width = 1000;
       dummyCanvas.height = 1000;
-      const result =
-        await detectSingleFace(dummyCanvas).withFaceLandmarks(true);
-      console.log("Inital model test result:", result);
+      const result = await detectSingleFace(
+        dummyCanvas,
+        new TinyFaceDetectorOptions({}),
+      ).withFaceLandmarks(true);
+      // console.log("Inital model test result:", result);
     })
     .then(async () => {
       store.modelsLoaded = true;

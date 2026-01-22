@@ -196,6 +196,9 @@ export function CompletionScreen() {
                   onClick={() => {
                     shareStore.note = "";
                     shareStore.includeNote = false;
+                    if (shareStore.images.length > 0) {
+                      shareStore.selectedImageIndex = 0;
+                    }
                     appState.dismissCompletion();
                   }}
                 >
@@ -207,6 +210,9 @@ export function CompletionScreen() {
                       shareStore.includeNote = true;
                     } else {
                       shareStore.includeNote = false;
+                    }
+                    if (shareStore.images.length > 0) {
+                      shareStore.selectedImageIndex = 0;
                     }
                     appState.dismissCompletion();
                   }}

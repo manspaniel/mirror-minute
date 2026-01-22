@@ -339,6 +339,27 @@ export class MirrorCanvas {
     });
   }
 
+  setFailed() {
+    animate(this.anims.canvasBackground, 1, {
+      duration: 0.5,
+      delay: 0,
+      ease: "easeInOut",
+      restDelta: 0.001,
+    });
+    animate(this.anims.canvasBlur, 10, {
+      duration: 0.5,
+      delay: 0,
+      ease: "easeInOut",
+      restDelta: 0.001,
+    });
+    animate(this.anims.guideVisibility, 0, {
+      duration: 0.5,
+      delay: 0.8,
+      ease: "easeInOut",
+      restDelta: 0.001,
+    });
+  }
+
   setGuideVisibility(visible: boolean) {
     animate(this.anims.guideVisibility, visible ? 1 : 0, {
       duration: 1,
@@ -492,6 +513,10 @@ export class MirrorCanvas {
   drawDebug() {
     const parts = faceStore.faceParts;
     const ctx = this.overlayCtx;
+
+    ctx.strokeStyle = "red";
+    ctx.lineWidth = 2;
+    ctx.globalAlpha = 1.0;
 
     ctx.save();
 

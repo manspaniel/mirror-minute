@@ -7,9 +7,9 @@ type Props = ComponentProps<"button"> & {
   variant?: "default" | "dark" | "light";
 };
 
-export function Button(props: Props) {
+export function Button({ loading, ...props }: Props) {
   const styles = buttonStyles({
-    loading: props.loading ? true : false,
+    loading: loading ? true : false,
     variant: props.variant ?? "default",
   });
 

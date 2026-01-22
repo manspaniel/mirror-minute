@@ -20,10 +20,10 @@ export const ColourThemes = {
     preview: ["#FF9E8F", "#FF9E8F"],
   },
   black: {
-    bg: "#1C1C1E",
-    line: "#3A3A3C",
-    text: "#FFFFFF",
-    preview: ["#1C1C1E", "#3A3A3C"],
+    bg: "#2C2953",
+    line: "#464F93",
+    text: "#DFDEF7",
+    preview: ["#2C2953", "#2C2953"],
   },
 };
 

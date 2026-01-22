@@ -44,7 +44,6 @@ export function ShareScreen() {
             files: [file],
             title: "My Mirror Minute",
             text: "Check out my Mirror Minute creation!",
-            url: window.location.origin,
           });
         } catch (error) {
           console.error("Error sharing:", error);

@@ -100,11 +100,9 @@ export function ChallengeManager() {
   useInterval(() => {
     // Manage invalidFor tracking
     if (appState.screen === "challenge" && store.running) {
-      console.log("FFF", store.running, store.faceCurrentlyCentered);
       if (store.running && !store.faceCurrentlyCentered) {
         store.invalidFor += 200;
         store.timeInvalid += 200;
-        console.log("INVALID");
       } else {
         store.invalidFor = 0;
       }

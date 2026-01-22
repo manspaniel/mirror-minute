@@ -4,7 +4,7 @@ import { faceStore, useFaceState } from "~/state/face-state";
 import { MirrorCanvas } from "./canvas/MirrorCanvas";
 import { subscribe } from "valtio";
 import { useAnimationFrame, useMotionValueEvent } from "motion/react";
-import { useChallengeState } from "~/state/challenge-state";
+import { challengeState, useChallengeState } from "~/state/challenge-state";
 import { useAppState } from "~/state/app-state";
 import { shareStore } from "~/state/share-state";
 
@@ -26,6 +26,10 @@ export function Background() {
 
   useEffect(() => {
     if (!mirror) return;
+    if (appState.screen === "failure") {
+      mirror.setFailed();
+      return;
+    }
     const timer = setTimeout(() => {
       mirror.setBackgroundMode(appState.screen === "challenge" ? false : true);
       mirror.setGuideVisibility(appState.screen === "challenge");
@@ -45,7 +49,7 @@ export function Background() {
         const image = await mirror.captureImage();
         if (image) {
           shareStore.images.push(image);
-          console.log("Captured image", image, "at", percent, "progress");
+          // console.log("Captured image", image, "at", percent, "progress");
         }
       }
     }
@@ -82,8 +86,9 @@ export function Background() {
     if (!camera.video) return;
 
     const timer = setInterval(() => {
+      if (challenge.completed) return;
       faceState.runUpdate();
-    }, 100);
+    }, 200);
     return () => clearTimeout(timer);
   }, [camera.video]);
 
