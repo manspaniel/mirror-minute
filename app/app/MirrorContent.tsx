@@ -15,6 +15,19 @@ export function MirrorContent() {
   );
 }
 
+const AFFIRMATIONS = [
+  {
+    text: "You’re halfway! Keep going...",
+    at: 30000,
+    duration: 5000,
+  },
+  {
+    text: "Almost there!",
+    at: 50000,
+    duration: 3000,
+  },
+];
+
 export function ChallengeOverlay() {
   const faceState = useFaceState();
   const challenge = useChallengeState();
@@ -41,6 +54,31 @@ export function ChallengeOverlay() {
       setEnabled(false);
     }
   }, [appState.screen === "challenge"]);
+
+  const [affirmation, setAffirmation] = useState<null | {
+    text: string;
+    at: number;
+    duration: number;
+  }>(null);
+
+  // Update affirmation based on timeElapsed
+  useEffect(() => {
+    if (!challenge.running) {
+      setAffirmation(null);
+      return;
+    }
+
+    const currentAffirmation = AFFIRMATIONS.find((aff) => {
+      const showStart = aff.at;
+      const showEnd = aff.at + aff.duration;
+      return (
+        challenge.timeElapsed >= showStart &&
+        challenge.timeElapsed < showEnd
+      );
+    });
+
+    setAffirmation(currentAffirmation || null);
+  }, [challenge.running, challenge.timeElapsed]);
 
   let warningMessage = "";
   let warningNotes = "";
@@ -82,6 +120,9 @@ export function ChallengeOverlay() {
         Hold still for {Math.ceil(challenge.holdStillFor / 1000)} seconds
       </div>
     );
+  } else if (affirmation && challenge.running && enabled) {
+    // Show affirmation when there are no warnings
+    label = <div>{affirmation.text}</div>;
   }
 
   if (challenge.running && enabled) {

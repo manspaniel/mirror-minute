@@ -193,18 +193,18 @@ function createFaceStore() {
 
     const ogPitch = pitch;
 
-    pitch = mapRange(pitch, -0.1, 0.1, 1, -1, false);
+    pitch = mapRange(pitch, -0.12, 0.12, 1, -1, false);
     yaw = mapRange(yaw, -0.1, 0.1, -1, 1, false);
 
-    console.log(
-      "EYE:",
-      eyeLine.toFixed(3),
-      jawY.toFixed(3),
-      "PITCH:",
-      ogPitch.toFixed(3),
-      "->",
-      pitch.toFixed(3),
-    );
+    // console.log(
+    //   "EYE:",
+    //   eyeLine.toFixed(3),
+    //   jawY.toFixed(3),
+    //   "PITCH:",
+    //   ogPitch.toFixed(3),
+    //   "->",
+    //   pitch.toFixed(3),
+    // );
 
     // pitch = pitch > 0 ? Math.pow(pitch, 2) : -Math.pow(-pitch, 2);
 
@@ -232,7 +232,7 @@ function createFaceStore() {
     );
     rawFacing.angleValidity.set(
       Math.abs(rawFacing.pitch.get()) < 0.6 &&
-        Math.abs(rawFacing.yaw.get()) < 0.6
+        Math.abs(rawFacing.yaw.get()) < 0.7
         ? 1
         : 0,
     );
@@ -257,7 +257,7 @@ function createFaceStore() {
     if (faceStore.facing.zoomValidity.get() < 0.5) {
       faceWarnings.push("zoom");
     }
-    if (faceStore.facing.centerValidity.get() < 0.7) {
+    if (faceStore.facing.centerValidity.get() < 0.6) {
       faceWarnings.push("position");
     }
 

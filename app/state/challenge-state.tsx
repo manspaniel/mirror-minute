@@ -6,7 +6,7 @@ import { useCameraState } from "./camera-state";
 import { faceStore } from "./face-state";
 import { Tracking } from "~/utils/tracking";
 
-const CHALLENGE_DURATION = 20 * 1000;
+const CHALLENGE_DURATION = 60 * 1000;
 const HOLD_STILL_DURATION = 3 * 1000;
 
 function createChallengeState() {
