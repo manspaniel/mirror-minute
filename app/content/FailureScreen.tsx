@@ -19,7 +19,7 @@ export function FailureScreen() {
         className="flex flex-col gap-5 text-center items-center"
       >
         <h3 className={"text-balance relative font-serif text-5xl"}>
-          Challenge Failed
+          It looks like you had some trouble
         </h3>
         <p className="font-serif text-lg">Are you ready to try again?</p>
         <motion.div
