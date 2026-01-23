@@ -1,4 +1,5 @@
 import { proxy, useSnapshot } from "valtio";
+import { cameraState } from "./camera-state";
 
 function createAppState() {
   const store = proxy({
@@ -21,6 +22,10 @@ function createAppState() {
     },
     completeChallenge() {
       store.screen = "complete";
+      // Stop the camera feed after a short delay to allow for any final captures
+      setTimeout(() => {
+        cameraState.stop();
+      }, 2000);
     },
     dismissCompletion() {
       store.screen = "summary";
