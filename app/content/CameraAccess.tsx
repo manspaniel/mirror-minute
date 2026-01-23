@@ -42,6 +42,8 @@ export function CameraAccess() {
     </Button>
   );
   let heading = "We need access to your camera to continue";
+  let subheading =
+    "Don't worry, only you can see your video feed — nothing will be recorded or stored without your permission. This is a private experience.";
   let instructions =
     "We're about to prompt you for camera access. Be sure to select 'Allow'";
   let connected = false;
@@ -138,7 +140,10 @@ export function CameraAccess() {
             "text-balance relative " + (connected ? "text-5xl" : "text-4xl")
           }
         >
-          {heading}
+          <div className="text-balance max-w-[20em] mx-auto">{heading}</div>
+          <div className="text-lg mt-3 text-balance font-serif max-w-[30em] mx-auto">
+            {subheading}
+          </div>
           <AnimatePresence initial>
             {connected && (
               <>
