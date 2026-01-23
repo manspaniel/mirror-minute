@@ -4,6 +4,7 @@ import { Button, buttonStyles } from "~/ui/Button";
 import { BURST, DIAMOND } from "~/ui/svgs";
 import { useEscape } from "~/utils/useEscape";
 import { ShareImage } from "./ShareImage";
+import { Tracking } from "~/utils/tracking";
 
 export function SummaryScreen() {
   useEscape(() => {
@@ -107,6 +108,7 @@ export function SummaryScreen() {
               <Button
                 variant="dark"
                 onClick={() => {
+                  Tracking.trackEvent("Summary - Customize & Share Clicked");
                   appState.openShare();
                 }}
               >
@@ -225,6 +227,9 @@ export function SummaryScreen() {
               <a
                 href="https://laughlines.com.au/"
                 target="_blank"
+                onClick={() => {
+                  Tracking.trackEvent("Summary - Visit Laugh Lines Website");
+                }}
                 className={buttonStyles({ variant: "light" }).base({
                   className: "max-md:w-full max-md:px-2",
                 })}
@@ -233,6 +238,9 @@ export function SummaryScreen() {
               </a>
               <a
                 href="https://www.instagram.com/laughlinesproject/"
+                onClick={() => {
+                  Tracking.trackEvent("Summary - Follow on Instagram");
+                }}
                 className={buttonStyles({
                   variant: "dark",
                   className: "max-md:w-full max-md:px-2",

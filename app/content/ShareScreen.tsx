@@ -21,6 +21,7 @@ import {
 } from "lucide-react";
 import * as Popover from "@radix-ui/react-popover";
 import * as Dialog from "@radix-ui/react-dialog";
+import { Tracking } from "~/utils/tracking";
 
 export function ShareScreen() {
   const isMobile = useIsMobile();
@@ -46,6 +47,12 @@ function DesktopShareScreen() {
   );
 
   async function download() {
+    Tracking.trackEvent("Share - Download Clicked", {
+      theme: shareStore.theme,
+      hasImage: shareStore.selectedImageIndex !== -1,
+      hasNote: shareStore.includeNote,
+      permissionGranted: shareStore.permissionToShare,
+    });
     const canvas = await generator.current();
     const link = document.createElement("a");
     link.download = "mirror-minute-share.png";
@@ -58,6 +65,12 @@ function DesktopShareScreen() {
   }
 
   async function share() {
+    Tracking.trackEvent("Share - Native Share Clicked", {
+      theme: shareStore.theme,
+      hasImage: shareStore.selectedImageIndex !== -1,
+      hasNote: shareStore.includeNote,
+      permissionGranted: shareStore.permissionToShare,
+    });
     const canvas = await generator.current();
     canvas.toBlob(async (blob) => {
       if (blob) {
@@ -70,8 +83,12 @@ function DesktopShareScreen() {
             title: "My Mirror Minute",
             text: "Check out my Mirror Minute creation!",
           });
+          Tracking.trackEvent("Share - Native Share Succeeded");
         } catch (error) {
           console.error("Error sharing:", error);
+          Tracking.trackEvent("Share - Native Share Failed", {
+            error: error instanceof Error ? error.message : String(error),
+          });
           download();
         }
       }
@@ -84,6 +101,19 @@ function DesktopShareScreen() {
 
   return (
     <div className="fixed inset-0">
+      {/* Header with back button */}
+      <div className="flex-none p-4 flex items-center fixed top-0 left-0 z-10">
+        <button
+          onClick={() => {
+            Tracking.trackEvent("Share - Back to Summary");
+            appState.closeShare();
+          }}
+          className="p-2 -ml-2 rounded-full hover:bg-black/10 transition-colors cursor-pointer inline-flex font-sans uppercase gap-2 font-normal text-indigo-950"
+        >
+          <ArrowLeft className="size-5" />
+        </button>
+      </div>
+
       <div className="flex items-center justify-center gap-20 h-full">
         {/* Preview */}
         <div className="flex-none md:ml-20">
@@ -154,6 +184,12 @@ function MobileShareScreen() {
   const [permissionDialogOpen, setPermissionDialogOpen] = useState(false);
 
   async function handleShareOrDownload(withPermission: boolean) {
+    Tracking.trackEvent("Share - Permission Dialog Submitted", {
+      permissionGranted: withPermission,
+      theme: shareStore.theme,
+      hasImage: shareStore.selectedImageIndex !== -1,
+      hasNote: shareStore.includeNote,
+    });
     shareStore.permissionToShare = withPermission;
     setPermissionDialogOpen(false);
 
@@ -201,7 +237,10 @@ function MobileShareScreen() {
       {/* Header */}
       <div className="flex-none p-4 flex items-center fixed top-0 left-0 right-0 z-10">
         <button
-          onClick={() => appState.closeShare()}
+          onClick={() => {
+            appState.closeShare();
+            Tracking.trackEvent("Share - Back to Summary");
+          }}
           className="p-2 -ml-2 rounded-full active:bg-black/10 transition-colors cursor-pointer inline-flex font-sans uppercase gap-2 font-normal"
           style={{ color: theme.text }}
         >
@@ -234,7 +273,10 @@ function MobileShareScreen() {
         style={{ background: theme.bg }}
       >
         <Button
-          onClick={() => setPermissionDialogOpen(true)}
+          onClick={() => {
+            Tracking.trackEvent("Share - Share or Download Button Clicked");
+            setPermissionDialogOpen(true);
+          }}
           className="!w-full !flex-1"
           variant={
             state.theme === "blue"
@@ -269,7 +311,8 @@ function MobileControlButtons() {
   const hasNote = share.includeNote;
   const isWhiteTheme = share.theme === "white";
 
-  const whiteShadow = "shadow-[0_2px_10px_rgba(99,87,255,0.15),0_0_0_1px_rgba(99,87,255,0.1)]";
+  const whiteShadow =
+    "shadow-[0_2px_10px_rgba(99,87,255,0.15),0_0_0_1px_rgba(99,87,255,0.1)]";
 
   const buttonClasses = cn(
     "size-8 rounded-full bg-white shadow-md flex items-center justify-center cursor-pointer transition-all",
@@ -399,6 +442,7 @@ function MobileSwatches() {
               share.theme === key ? theme.preview[1] : "transparent",
           }}
           onClick={() => {
+            Tracking.trackEvent("Share - Theme Changed", { theme: key });
             shareStore.theme = key as keyof typeof ColourThemes;
           }}
         />
@@ -415,6 +459,7 @@ function MobileImageSelector() {
       <MobileSelectableImage
         selected={share.selectedImageIndex === -1}
         onSelect={() => {
+          Tracking.trackEvent("Share - Image Selected", { imageIndex: -1 });
           shareStore.selectedImageIndex = -1;
         }}
       />
@@ -424,6 +469,9 @@ function MobileImageSelector() {
           image={img}
           selected={share.selectedImageIndex === index}
           onSelect={() => {
+            Tracking.trackEvent("Share - Image Selected", {
+              imageIndex: index,
+            });
             shareStore.selectedImageIndex = index;
           }}
         />
@@ -486,6 +534,7 @@ function MobileReflection({ onClose }: { onClose: () => void }) {
         <Switch
           checked={state.includeNote}
           onChange={(checked) => {
+            Tracking.trackEvent("Share - Note Toggle", { enabled: checked });
             shareStore.includeNote = checked;
           }}
         />
@@ -563,10 +612,7 @@ function PermissionDialog({
               reflection for reproduction in campaign materials.
             </span>
           </label>
-          <Button
-            onClick={() => onShare(permissionChecked)}
-            className="w-full"
-          >
+          <Button onClick={() => onShare(permissionChecked)} className="w-full">
             Share
           </Button>
         </Dialog.Content>
@@ -604,6 +650,7 @@ function Swatches() {
               share.theme === key ? theme.preview[1] : "transparent",
           }}
           onClick={() => {
+            Tracking.trackEvent("Share - Theme Changed", { theme: key });
             shareStore.theme = key as keyof typeof ColourThemes;
           }}
         ></div>
@@ -620,6 +667,7 @@ function ImageSelector() {
       <SelectableImage
         selected={share.selectedImageIndex === -1}
         onSelect={() => {
+          Tracking.trackEvent("Share - Image Selected", { imageIndex: -1 });
           shareStore.selectedImageIndex = -1;
         }}
       />
@@ -629,6 +677,9 @@ function ImageSelector() {
           image={img}
           selected={share.selectedImageIndex === index}
           onSelect={() => {
+            Tracking.trackEvent("Share - Image Selected", {
+              imageIndex: index,
+            });
             shareStore.selectedImageIndex = index;
           }}
         />
@@ -680,6 +731,7 @@ function Reflection() {
         <Switch
           checked={state.includeNote}
           onChange={(checked) => {
+            Tracking.trackEvent("Share - Note Toggle", { enabled: checked });
             shareStore.includeNote = checked;
           }}
         />
@@ -727,6 +779,9 @@ function Permissions() {
         <Checkbox
           checked={state.permissionToShare}
           onChange={(checked) => {
+            Tracking.trackEvent("Share - Permission Checkbox", {
+              granted: checked,
+            });
             shareStore.permissionToShare = checked;
           }}
         />

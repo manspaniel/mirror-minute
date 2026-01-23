@@ -6,6 +6,7 @@ import { cameraState } from "~/state/camera-state";
 import { useFaceState } from "~/state/face-state";
 import { Button } from "~/ui/Button";
 import { BURST, DIAMOND } from "~/ui/svgs";
+import { Tracking } from "~/utils/tracking";
 
 export function CameraAccess() {
   const camera = useSnapshot(cameraState);
@@ -31,7 +32,14 @@ export function CameraAccess() {
   }, [camera.status === "accepted"]);
 
   let accessControl: ReactNode = (
-    <Button onClick={() => camera.start()}>Start Camera</Button>
+    <Button
+      onClick={() => {
+        Tracking.trackEvent("Camera - Start Camera Clicked");
+        camera.start();
+      }}
+    >
+      Start Camera
+    </Button>
   );
   let heading = "We need access to your camera to continue";
   let instructions =
@@ -49,7 +57,16 @@ export function CameraAccess() {
     heading = "Couldn't connect";
     instructions =
       "It looks like you didn't grant permissions for this website to access your camera!\nYou may need to manually update your settings to allow for access.";
-    accessControl = <Button onClick={() => camera.start()}>Try again</Button>;
+    accessControl = (
+      <Button
+        onClick={() => {
+          Tracking.trackEvent("Camera - Try Again Clicked");
+          camera.start();
+        }}
+      >
+        Try again
+      </Button>
+    );
   } else if (camera.status === "accepted") {
     heading = "Connected!";
     accessControl = null;
@@ -80,8 +97,23 @@ export function CameraAccess() {
   const faceState = useFaceState();
 
   useEffect(() => {
+    if (camera.status === "accepted") {
+      Tracking.trackEvent("Camera - Permission Granted");
+    } else if (
+      camera.status === "error" ||
+      camera.status === "rejected" ||
+      camera.status === "nocamera"
+    ) {
+      Tracking.trackEvent("Camera - Permission Denied", {
+        errorType: camera.status,
+      });
+    }
+  }, [camera.status]);
+
+  useEffect(() => {
     if (camera.status === "accepted" && faceState.hasRun) {
       const timer = setTimeout(() => {
+        Tracking.trackEvent("Challenge - Opening Challenge");
         appState.doneWithCamera();
       }, 2500);
       return () => clearTimeout(timer);

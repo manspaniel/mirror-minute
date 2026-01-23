@@ -6,6 +6,7 @@ import { Button } from "~/ui/Button";
 import { useEscape } from "~/utils/useEscape";
 import { useIsMobile } from "~/utils/useIsMobile";
 import { useReflectionNote } from "~/utils/useReflectionNote";
+import { Tracking } from "~/utils/tracking";
 
 export function CompletionScreen() {
   const app = useAppState();
@@ -194,6 +195,7 @@ export function CompletionScreen() {
                 <Button
                   variant="dark"
                   onClick={() => {
+                    Tracking.trackEvent("Completion - Skip Reflection");
                     shareStore.note = "";
                     shareStore.includeNote = false;
                     if (shareStore.images.length > 0) {
@@ -206,6 +208,11 @@ export function CompletionScreen() {
                 </Button>
                 <Button
                   onClick={() => {
+                    const hasNote = !!shareStore.note;
+                    Tracking.trackEvent("Completion - Continue to Summary", {
+                      hasReflection: hasNote,
+                      reflectionLength: shareStore.note.length,
+                    });
                     if (shareStore.note) {
                       shareStore.includeNote = true;
                     } else {

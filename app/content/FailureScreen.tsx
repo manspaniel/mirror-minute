@@ -1,6 +1,7 @@
 import { motion } from "motion/react";
 import { useAppState } from "~/state/app-state";
 import { Button } from "~/ui/Button";
+import { Tracking } from "~/utils/tracking";
 
 export function FailureScreen() {
   const appState = useAppState();
@@ -30,7 +31,14 @@ export function FailureScreen() {
           }}
           exit={{ opacity: 0, scale: 0.95 }}
         >
-          <Button onClick={() => appState.doneWithCamera()}>Continue</Button>
+          <Button
+            onClick={() => {
+              Tracking.trackEvent("Failure - Retry Challenge");
+              appState.doneWithCamera();
+            }}
+          >
+            Continue
+          </Button>
         </motion.div>
       </motion.div>
     </div>

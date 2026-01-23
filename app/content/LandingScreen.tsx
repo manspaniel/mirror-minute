@@ -5,6 +5,7 @@ import { Button } from "~/ui/Button";
 import { BURST, DIAMOND } from "~/ui/svgs";
 import { useEscape } from "~/utils/useEscape";
 import { useIsMobile } from "~/utils/useIsMobile";
+import { Tracking } from "~/utils/tracking";
 
 export function LandingScreen() {
   const app = useAppState();
@@ -350,7 +351,12 @@ export function LandingScreen() {
                 }}
                 exit={{ opacity: 0 }}
               >
-                <Button onClick={() => appState.dismissLanding()}>
+                <Button
+                  onClick={() => {
+                    Tracking.trackEvent("Landing - Get Started Clicked");
+                    appState.dismissLanding();
+                  }}
+                >
                   Get Started
                 </Button>
               </motion.div>
