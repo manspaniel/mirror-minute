@@ -1,11 +1,11 @@
+import { AnimatePresence, motion } from "motion/react";
 import { useEffect, useState } from "react";
-import { Background } from "./Background";
-import { Screens } from "./Screens";
-import { MirrorContent } from "./MirrorContent";
 import { ChallengeManager, useChallengeState } from "~/state/challenge-state";
 import { FaceStateManager } from "~/state/face-state";
-import { AnimatePresence, motion } from "motion/react";
-import { useAppState } from "~/state/app-state";
+import { Tracking } from "~/utils/tracking";
+import { Background } from "./Background";
+import { MirrorContent } from "./MirrorContent";
+import { Screens } from "./Screens";
 
 export function App() {
   const state = useChallengeState();
@@ -13,6 +13,10 @@ export function App() {
 
   useEffect(() => {
     setReady(true);
+  }, []);
+
+  useEffect(() => {
+    Tracking.initialize();
   }, []);
 
   return (
