@@ -96,7 +96,7 @@ export function ChallengeOverlay() {
             paused: { scale: 1, opacity: 0.8, filter: "blur(2px)" },
           }}
           animate={challenge.paused ? "paused" : "running"}
-          className="text-white font-sans text-6xl tracking-wider leading-[0.8]"
+          className="text-white font-sans text-4xl md:text-6xl tracking-wider leading-[0.8]"
         >
           {`${minutes}:${seconds.toString().padStart(2, "0")}`}
         </motion.div>
@@ -176,7 +176,7 @@ export function ChallengeOverlay() {
       </div>
 
       {/* Final countdown */}
-      <div className="absolute inset-0 flex items-center justify-center text-center flex-col gap-2 p-8 pointer-events-none text-white text-7xl">
+      <div className="absolute inset-0 flex items-center justify-center text-center flex-col gap-2 p-8 pointer-events-none text-white text-4xl md:text-7xl">
         <AnimatePresence mode="popLayout">
           {finalSeconds ? (
             <motion.div

@@ -14,7 +14,7 @@ export function Button({ loading, ...props }: Props) {
   });
 
   return (
-    <button {...props} className={styles.base()}>
+    <button {...props} className={styles.base({ className: props.className })}>
       <span className={styles.label()}>{props.children}</span>
       <span className={styles.spinner()}>
         <Spinner />

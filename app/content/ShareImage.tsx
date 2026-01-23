@@ -481,7 +481,7 @@ export function ShareImage(props: Props) {
 
   return (
     <div
-      className="absolute size-full border break-words"
+      className={cn("absolute size-full border break-words", props.className)}
       ref={ref}
       style={
         {
