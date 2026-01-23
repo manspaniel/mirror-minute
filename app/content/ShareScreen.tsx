@@ -47,7 +47,7 @@ function DesktopShareScreen() {
   );
 
   async function download() {
-    Tracking.trackEvent("Share - Download Clicked", {
+    Tracking.trackEvent("Share - Downloaded (Desktop)", {
       theme: shareStore.theme,
       hasImage: shareStore.selectedImageIndex !== -1,
       hasNote: shareStore.includeNote,
@@ -65,7 +65,7 @@ function DesktopShareScreen() {
   }
 
   async function share() {
-    Tracking.trackEvent("Share - Native Share Clicked", {
+    Tracking.trackEvent("Share - Shared", {
       theme: shareStore.theme,
       hasImage: shareStore.selectedImageIndex !== -1,
       hasNote: shareStore.includeNote,
@@ -83,10 +83,9 @@ function DesktopShareScreen() {
             title: "My Mirror Minute",
             text: "Check out my Mirror Minute creation!",
           });
-          Tracking.trackEvent("Share - Native Share Succeeded");
         } catch (error) {
           console.error("Error sharing:", error);
-          Tracking.trackEvent("Share - Native Share Failed", {
+          Tracking.trackEvent("Share - Sharing Error", {
             error: error instanceof Error ? error.message : String(error),
           });
           download();
@@ -184,7 +183,7 @@ function MobileShareScreen() {
   const [permissionDialogOpen, setPermissionDialogOpen] = useState(false);
 
   async function handleShareOrDownload(withPermission: boolean) {
-    Tracking.trackEvent("Share - Permission Dialog Submitted", {
+    Tracking.trackEvent("Share - Shared", {
       permissionGranted: withPermission,
       theme: shareStore.theme,
       hasImage: shareStore.selectedImageIndex !== -1,
@@ -274,7 +273,7 @@ function MobileShareScreen() {
       >
         <Button
           onClick={() => {
-            Tracking.trackEvent("Share - Share or Download Button Clicked");
+            Tracking.trackEvent("Share - Asked for Share Permision (Mobile)");
             setPermissionDialogOpen(true);
           }}
           className="!w-full !flex-1"
