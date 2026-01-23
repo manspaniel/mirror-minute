@@ -140,7 +140,7 @@ function createFaceStore() {
   function getTop(points: FacePoint[]) {
     let value = points[0].y;
     for (let p of points) {
-      if (p.y > value) {
+      if (p.y < value) {
         value = p.y;
       }
     }
@@ -186,11 +186,25 @@ function createFaceStore() {
     const mouth = getMeanPosition(store.faceParts.mouth);
     const jawY = getTop(store.faceParts.jaw);
 
-    let pitch = (jawY - mouth.y) / box.height;
+    // let pitch = (jawY - mouth.y) / box.height;
+    const eyeLine = (eyeLeft.y + eyeRight.y) / 2;
+    let pitch = eyeLine / box.height - jawY / box.height;
     let yaw = (eyeLeft.x + (eyeRight.x - eyeLeft.x) / 2 - nose.x) / box.width;
 
-    pitch = mapRange(pitch, 0.15, 0.3, -1, 1);
-    yaw = mapRange(yaw, -0.1, 0.1, -1, 1);
+    const ogPitch = pitch;
+
+    pitch = mapRange(pitch, -0.1, 0.1, 1, -1, false);
+    yaw = mapRange(yaw, -0.1, 0.1, -1, 1, false);
+
+    console.log(
+      "EYE:",
+      eyeLine.toFixed(3),
+      jawY.toFixed(3),
+      "PITCH:",
+      ogPitch.toFixed(3),
+      "->",
+      pitch.toFixed(3),
+    );
 
     // pitch = pitch > 0 ? Math.pow(pitch, 2) : -Math.pow(-pitch, 2);
 

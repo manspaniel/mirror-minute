@@ -121,6 +121,8 @@ export class MirrorCanvas {
     guideSetup: motionValue(1),
   };
 
+  shouldDebug = false;
+
   constructor(public container: HTMLElement) {
     container.appendChild(this.gl.canvas);
     this.gl.canvas.style.position = "absolute";
@@ -128,6 +130,12 @@ export class MirrorCanvas {
     this.overlayCanvas.style.position = "absolute";
     window.addEventListener("resize", () => this.resize());
     this.frame(0);
+
+    if (process.env.NODE_ENV === "development") {
+      this.shouldDebug = true;
+    } else {
+      this.shouldDebug = window.location.search.includes("debug");
+    }
 
     const { width, height } = container.getBoundingClientRect();
     this.size.set(width, height);
@@ -191,7 +199,10 @@ export class MirrorCanvas {
     this.renderer.render({ scene: this.scene });
 
     this.drawOverlay();
-    // this.drawDebug();
+
+    if (this.shouldDebug) {
+      this.drawDebug();
+    }
   }
 
   private frame = (t: number) => {
