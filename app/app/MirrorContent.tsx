@@ -179,7 +179,7 @@ export function ChallengeOverlay() {
               exit={{ opacity: 0 }}
               key={warningMessage}
               transition={{ duration: 0.2 }}
-              className="absolute top-full pt-8 -left-10 -right-10 text-center font-sans max-md:text-lg text-2xl text-white uppercase"
+              className="absolute top-full pt-8 left-1/2 w-[90vw] -translate-x-1/2 text-center font-sans max-md:text-lg text-2xl text-white uppercase"
             >
               {label}
             </motion.div>
