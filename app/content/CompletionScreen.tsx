@@ -169,7 +169,7 @@ export function CompletionScreen() {
                   }}
                   maxLength={reflection.maxLength}
                   autoFocus
-                  placeholder="The mirror minute made me feel..."
+                  placeholder="How did it feel to look at yourself?"
                 />
                 {reflection.percentageUsed > 0.2 && (
                   <div className="w-full text-right text-indigo-950/60 text-xs px-3 py-2">
@@ -269,7 +269,7 @@ const YOURSELF_VECTOR = (
     viewBox="0 0 93 68"
     fill="none"
     xmlns="http://www.w3.org/2000/svg"
-    className="absolute top-0 left-[0.1em] w-full h-full scale-[150%]"
+    className="absolute top-0 left-[0.1em] w-full h-full -z-10 scale-[150%]"
     data-yourself-circle
     style={{ strokeDashoffset: "330px" }}
   >

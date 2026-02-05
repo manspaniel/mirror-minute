@@ -549,7 +549,7 @@ function MobileReflection({ onClose }: { onClose: () => void }) {
             <div className="relative border border-indigo-950/20 rounded-xl focus-within:ring-2 focus-within:ring-indigo-500">
               <textarea
                 className="w-full h-20 px-3 py-2 placeholder:text-indigo-950/40 border-none resize-none outline-none font-serif text-[16px] rounded-xl"
-                placeholder="The mirror minute made me feel..."
+                placeholder="How did it feel to look at yourself?"
                 defaultValue={reflection.initialValue}
                 onChange={(e) => {
                   reflection.setValue(e.target.value);
@@ -748,7 +748,7 @@ function Reflection() {
               <div className="relative border border-indigo-950/20 rounded-xl focus-within:ring-2 focus-within:ring-indigo-500">
                 <textarea
                   className="w-full h-24 px-3 py-2 placeholder:text-indigo-950/40 border-none resize-none field-sizing-content outline-indigo-500 font-serif text-lg outline-none"
-                  placeholder="The mirror minute made me feel..."
+                  placeholder="How did it feel to look at yourself?"
                   defaultValue={reflection.initialValue}
                   onChange={(e) => {
                     reflection.setValue(e.target.value);

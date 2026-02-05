@@ -17,6 +17,11 @@ export function MirrorContent() {
 
 const AFFIRMATIONS = [
   {
+    text: "What’s coming to mind when you look at yourself?",
+    at: 5000,
+    duration: 5000,
+  },
+  {
     text: "You’re halfway! Keep going...",
     at: 30000,
     duration: 5000,
@@ -72,8 +77,7 @@ export function ChallengeOverlay() {
       const showStart = aff.at;
       const showEnd = aff.at + aff.duration;
       return (
-        challenge.timeElapsed >= showStart &&
-        challenge.timeElapsed < showEnd
+        challenge.timeElapsed >= showStart && challenge.timeElapsed < showEnd
       );
     });
 

@@ -202,7 +202,7 @@ export function LandingScreen() {
             </a>
           </div>
 
-          <div className="absolute inset-0 pointer-events-none">
+          <div className="absolute inset-0 pointer-events-none -z-10">
             <svg
               width="1280"
               height="527"
@@ -402,7 +402,7 @@ const YOURSELF_VECTOR = (
     viewBox="0 0 153 77"
     fill="none"
     xmlns="http://www.w3.org/2000/svg"
-    className="absolute top-0 left-0 w-full h-full scale-[150%]"
+    className="absolute top-0 left-0 w-full h-full scale-[150%] -z-10"
     data-yourself-circle
     style={{ strokeDashoffset: "400px" }}
   >
