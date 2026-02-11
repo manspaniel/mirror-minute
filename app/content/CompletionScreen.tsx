@@ -1,5 +1,5 @@
 import { animate, motion } from "motion/react";
-import { useEffect, useRef, useState } from "react";
+import { useCallback, useEffect, useRef, useState } from "react";
 import { appState, useAppState } from "~/state/app-state";
 import { shareStore } from "~/state/share-state";
 import { Button } from "~/ui/Button";
@@ -12,7 +12,7 @@ export function CompletionScreen() {
   const app = useAppState();
 
   const [state, setState] = useState({
-    step: "success" as "success" | "reflection",
+    step: "success" as "success" | "quote" | "reflection",
   });
 
   useEscape(() => {
@@ -22,8 +22,9 @@ export function CompletionScreen() {
   const isMobile = useIsMobile();
 
   const successRef = useRef<HTMLDivElement>(null!);
+  const reflectionInputRef = useRef<HTMLTextAreaElement>(null);
 
-  async function successAnim() {
+  const successAnim = useCallback(async () => {
     const lookLabel = successRef.current.querySelector("[data-look-label]")!;
     const lookCircle = successRef.current.querySelector(
       "[data-yourself-circle]",
@@ -50,13 +51,30 @@ export function CompletionScreen() {
         ],
       ]),
     ]);
-  }
+  }, []);
 
   useEffect(() => {
     if (state.step === "success") {
       successAnim().then(() => {
-        setState({ step: "reflection" });
+        setState({ step: "quote" });
       });
+    }
+  }, [state.step, successAnim]);
+
+  useEffect(() => {
+    if (state.step === "quote") {
+      const timer = setTimeout(() => {
+        setState({ step: "reflection" });
+      }, 3000);
+      return () => {
+        clearTimeout(timer);
+      };
+    }
+  }, [state.step]);
+
+  useEffect(() => {
+    if (state.step === "reflection") {
+      reflectionInputRef.current?.focus();
     }
   }, [state.step]);
 
@@ -80,10 +98,10 @@ export function CompletionScreen() {
             </div>
           </div>
 
-          {SUCCESS_VECTOR.paths.map((path, index) => {
+          {SUCCESS_VECTOR.paths.map((path) => {
             return (
               <div
-                key={index}
+                key={path.id}
                 className="fixed inset-0 flex items-center justify-center will-change-transform isolate opacity-0"
                 data-success-ring
                 style={{ strokeWidth: 8 }}
@@ -94,7 +112,12 @@ export function CompletionScreen() {
                   fill="none"
                   xmlns="http://www.w3.org/2000/svg"
                 >
-                  {path}
+                  <title>Success ring</title>
+                  <path
+                    d={path.d}
+                    stroke={path.stroke}
+                    strokeLinejoin={path.strokeLinejoin}
+                  />
                 </svg>
               </div>
             );
@@ -113,6 +136,7 @@ export function CompletionScreen() {
               xmlns="http://www.w3.org/2000/svg"
               className="w-full h-full object-center object-cover opacity-25"
             >
+              <title>Reflection flourish</title>
               <motion.path
                 d="M0 828.003C231.712 417.273 637.76 159.128 612.161 563.855C835.487 126.61 1099.86 88.0881 1146.2 407.767C1246.83 102.096 1749.54 -224.087 1714.23 224.164"
                 stroke="#6357FF"
@@ -168,7 +192,7 @@ export function CompletionScreen() {
                     reflection.setValue(e.target.value);
                   }}
                   maxLength={reflection.maxLength}
-                  autoFocus
+                  ref={reflectionInputRef}
                   placeholder="How did it feel to look at yourself?"
                 />
                 {reflection.percentageUsed > 0.2 && (
@@ -231,6 +255,22 @@ export function CompletionScreen() {
           </div>
         </div>
       )}
+      {/* Quote */}
+      {state.step === "quote" && (
+        <div className="fixed inset-0 flex items-center justify-center text-indigo-950">
+          <motion.div
+            initial={{ opacity: 0, scale: 0.98 }}
+            animate={{ opacity: 1, scale: 1 }}
+            exit={{ opacity: 0 }}
+            transition={{ duration: 0.8, ease: "easeOut" }}
+            className="w-[90vw] md:w-[70vw] text-center font-serif text-[5vw] md:text-[2.6vw] leading-[1.2] text-balance"
+          >
+            <p>
+              “You don’t become beautiful. You realise you already are.”
+            </p>
+          </motion.div>
+        </div>
+      )}
     </>
   );
 }
@@ -239,26 +279,30 @@ const SUCCESS_VECTOR = {
   width: 1339,
   height: 1286,
   paths: [
-    <path
-      d="M672.726 471.364C581.36 465.221 507.98 537.852 492.872 631.803C477.765 725.753 556.9 798.385 630.64 810.309C704.38 822.234 819.487 821.511 844.307 682.03C869.126 542.55 764.092 477.507 672.726 471.364Z"
-      stroke="white"
-      strokeLinejoin="round"
-    />,
-    <path
-      d="M675.454 326.67C506.799 315.348 371.343 449.209 343.455 622.362C315.567 795.516 461.647 929.376 597.767 951.353C733.886 973.331 946.366 971.999 992.181 714.933C1038 457.867 844.11 337.991 675.454 326.67Z"
-      stroke="white"
-      strokeLinejoin="round"
-    />,
-    <path
-      d="M678.219 179.98C431.25 163.408 232.896 359.343 192.059 612.792C151.222 866.24 365.132 1062.17 564.457 1094.34C763.783 1126.51 1074.92 1124.56 1142.01 748.289C1209.1 372.016 925.188 196.551 678.219 179.98Z"
-      stroke="white"
-      strokeLinejoin="round"
-    />,
-    <path
-      d="M681.525 5.34891C340.887 -17.4728 67.3035 252.36 10.9776 601.398C-45.3484 950.435 249.692 1220.27 524.617 1264.57C799.541 1308.87 1228.69 1306.19 1321.23 787.999C1413.76 269.812 1022.16 28.1706 681.525 5.34891Z"
-      stroke="white"
-      strokeLinejoin="round"
-    />,
+    {
+      id: "ring-1",
+      d: "M672.726 471.364C581.36 465.221 507.98 537.852 492.872 631.803C477.765 725.753 556.9 798.385 630.64 810.309C704.38 822.234 819.487 821.511 844.307 682.03C869.126 542.55 764.092 477.507 672.726 471.364Z",
+      stroke: "white",
+      strokeLinejoin: "round" as const,
+    },
+    {
+      id: "ring-2",
+      d: "M675.454 326.67C506.799 315.348 371.343 449.209 343.455 622.362C315.567 795.516 461.647 929.376 597.767 951.353C733.886 973.331 946.366 971.999 992.181 714.933C1038 457.867 844.11 337.991 675.454 326.67Z",
+      stroke: "white",
+      strokeLinejoin: "round" as const,
+    },
+    {
+      id: "ring-3",
+      d: "M678.219 179.98C431.25 163.408 232.896 359.343 192.059 612.792C151.222 866.24 365.132 1062.17 564.457 1094.34C763.783 1126.51 1074.92 1124.56 1142.01 748.289C1209.1 372.016 925.188 196.551 678.219 179.98Z",
+      stroke: "white",
+      strokeLinejoin: "round" as const,
+    },
+    {
+      id: "ring-4",
+      d: "M681.525 5.34891C340.887 -17.4728 67.3035 252.36 10.9776 601.398C-45.3484 950.435 249.692 1220.27 524.617 1264.57C799.541 1308.87 1228.69 1306.19 1321.23 787.999C1413.76 269.812 1022.16 28.1706 681.525 5.34891Z",
+      stroke: "white",
+      strokeLinejoin: "round" as const,
+    },
   ],
 };
 
@@ -273,6 +317,7 @@ const YOURSELF_VECTOR = (
     data-yourself-circle
     style={{ strokeDashoffset: "330px" }}
   >
+    <title>Yourself highlight</title>
     <path
       d="M67.3063 65.2412C115.064 30.8584 81.1417 -2.41357 48.5599 2.47896C23.1183 6.2993 3.92535 20.4888 2.14098 35.7703C0.547813 49.4142 12.8533 63.1188 28.475 65.2412C44.0967 67.3635 64.3284 65.787 78.0177 50.5057"
       stroke="#6357FF"

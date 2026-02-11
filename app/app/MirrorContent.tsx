@@ -17,9 +17,13 @@ export function MirrorContent() {
 
 const AFFIRMATIONS = [
   {
-    text:
-      "Be still now. The real challenge? Don’t touch your face. Don’t fix your hair. Don’t search for your good side, just look at yourself.",
+    text: "Start",
     at: 0,
+    duration: 1000,
+  },
+  {
+    text: "Be still now. The real challenge? Don’t touch your face. Don’t fix your hair. Don’t search for your good side, just look at yourself.",
+    at: 2000,
     duration: 5000,
   },
   {
@@ -137,7 +141,7 @@ export function ChallengeOverlay() {
     );
   } else if (affirmation && challenge.running && enabled) {
     // Show affirmation when there are no warnings
-    label = <div>{affirmation.text}</div>;
+    label = <div className="max-md:text-md text-xl">{affirmation.text}</div>;
   }
 
   if (challenge.running && enabled) {
