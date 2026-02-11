@@ -17,19 +17,30 @@ export function MirrorContent() {
 
 const AFFIRMATIONS = [
   {
-    text: "What’s coming to mind when you look at yourself?",
-    at: 5000,
+    text:
+      "Be still now. The real challenge? Don’t touch your face. Don’t fix your hair. Don’t search for your good side, just look at yourself.",
+    at: 0,
     duration: 5000,
   },
   {
-    text: "You’re halfway! Keep going...",
+    text: "What’s coming to mind as you look at yourself?",
+    at: 10000,
+    duration: 5000,
+  },
+  {
+    text: "Pausing’s tricky isn’t it... send yourself some love.",
+    at: 20000,
+    duration: 5000,
+  },
+  {
+    text: "You’re halfway! Keep looking at yourself...",
     at: 30000,
     duration: 5000,
   },
   {
-    text: "Almost there!",
-    at: 50000,
-    duration: 3000,
+    text: "Do you like what you see?",
+    at: 40000,
+    duration: 5000,
   },
 ];
 
@@ -58,7 +69,7 @@ export function ChallengeOverlay() {
     } else {
       setEnabled(false);
     }
-  }, [appState.screen === "challenge"]);
+  }, [appState.screen]);
 
   const [affirmation, setAffirmation] = useState<null | {
     text: string;
