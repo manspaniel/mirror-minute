@@ -22,11 +22,6 @@ const AFFIRMATIONS = [
     duration: 1000,
   },
   {
-    text: "Be still now. The real challenge? Don’t touch your face. Don’t fix your hair. Don’t search for your good side, just look at yourself.",
-    at: 2000,
-    duration: 5000,
-  },
-  {
     text: "What’s coming to mind as you look at yourself?",
     at: 10000,
     duration: 5000,
