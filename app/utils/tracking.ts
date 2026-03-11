@@ -28,19 +28,17 @@ export namespace Tracking {
     }
 
     if (!window.GA4_INITIALIZED) {
-      window.GA4_INITIALIZED = true;
-      window.dataLayer = window.dataLayer || [];
-      window.gtag = window.gtag || function gtag(...args: any[]) {
-        window.dataLayer?.push(args);
-      };
-
-      const script = document.createElement("script");
-      script.async = true;
-      script.src = "https://www.googletagmanager.com/gtag/js?id=G-FES8YVFE2F";
-      document.head.appendChild(script);
-
-      window.gtag("js", new Date());
-      window.gtag("config", "G-FES8YVFE2F");
+      // window.GA4_INITIALIZED = true;
+      // window.dataLayer = window.dataLayer || [];
+      // window.gtag = window.gtag || function gtag(...args: any[]) {
+      //   window.dataLayer?.push(args);
+      // };
+      // const script = document.createElement("script");
+      // script.async = true;
+      // script.src = "https://www.googletagmanager.com/gtag/js?id=G-FES8YVFE2F";
+      // document.head.appendChild(script);
+      // window.gtag("js", new Date());
+      // window.gtag("config", "G-FES8YVFE2F");
     }
   }
 
