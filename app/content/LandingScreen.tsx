@@ -6,6 +6,7 @@ import { BURST, DIAMOND } from "~/ui/svgs";
 import { useEscape } from "~/utils/useEscape";
 import { useIsMobile } from "~/utils/useIsMobile";
 import { Tracking } from "~/utils/tracking";
+import { Link } from "react-router";
 
 export function LandingScreen() {
   const app = useAppState();
@@ -361,6 +362,15 @@ export function LandingScreen() {
                 </Button>
               </motion.div>
             </div>
+          </div>
+          <div className="fixed bottom-4 right-4">
+            <Link
+              target="_blank"
+              to="/privacy"
+              className="underline text-xs md:text-sm"
+            >
+              Privacy Policy
+            </Link>
           </div>
         </div>
       )}

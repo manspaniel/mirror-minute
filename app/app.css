@@ -101,9 +101,38 @@ body {
 }
 
 [data-state="open"][data-side="bottom"] {
-  animation: zoomIn 150ms ease-out, slideInFromTop 150ms ease-out;
+  animation:
+    zoomIn 150ms ease-out,
+    slideInFromTop 150ms ease-out;
 }
 
 [data-state="closed"] {
   animation: zoomOut 100ms ease-in;
+}
+
+.privacy-text {
+  @apply text-pretty;
+
+  h2 {
+    @apply font-sans leading-[1] uppercase text-xl mt-8 max-w-[30em];
+  }
+
+  h3 {
+    @apply font-serif leading-[1.2] text-3xl mt-5 max-w-[30em];
+  }
+
+  p,
+  li,
+  ul,
+  ol {
+    @apply font-serif leading-[1.5] text-xl;
+  }
+
+  p {
+    @apply mt-[0.9em];
+  }
+
+  ul {
+    @apply mt-[0.9em] list-disc list-inside ml-[2em];
+  }
 }

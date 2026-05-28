@@ -5,6 +5,7 @@ import { BURST, DIAMOND } from "~/ui/svgs";
 import { useEscape } from "~/utils/useEscape";
 import { ShareImage } from "./ShareImage";
 import { Tracking } from "~/utils/tracking";
+import { Link } from "react-router";
 
 export function SummaryScreen() {
   useEscape(() => {
@@ -248,6 +249,15 @@ export function SummaryScreen() {
               >
                 Follow on Instagram
               </a>
+              <div className="absolute bottom-4 right-4">
+                <Link
+                  target="_blank"
+                  to="/privacy"
+                  className="underline text-xs md:text-sm"
+                >
+                  Privacy Policy
+                </Link>
+              </div>
             </motion.div>
           </div>
         </div>

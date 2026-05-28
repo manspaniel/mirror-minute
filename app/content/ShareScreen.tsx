@@ -22,6 +22,7 @@ import {
 import * as Popover from "@radix-ui/react-popover";
 import * as Dialog from "@radix-ui/react-dialog";
 import { Tracking } from "~/utils/tracking";
+import { Link } from "react-router";
 
 export function ShareScreen() {
   const isMobile = useIsMobile();
@@ -607,8 +608,13 @@ function PermissionDialog({
               onChange={setPermissionChecked}
             />
             <span className="font-serif text-sm text-indigo-950 text-balance -mt-0.5">
-              I give permission for Laugh Lines to save a copy of my image and
-              reflection for reproduction in campaign materials.
+              I give permission for Laugh Lines to save and use a copy of my
+              image and reflection for reproduction in campaign materials,
+              including social media and future creative projects. I understand
+              this is optional and I can withdraw my consent at any time.{" "}
+              <Link target="_blank" to="/privacy" className="underline">
+                Privacy Policy
+              </Link>
             </span>
           </label>
           <Button onClick={() => onShare(permissionChecked)} className="w-full">
@@ -785,8 +791,13 @@ function Permissions() {
           }}
         />
         <span className="font-serif text-lg text-balance max-w-[30em] -mt-1">
-          I give permission for Laugh Lines to save a copy of my image and
-          reflection for reproduction in campaign materials.
+          I give permission for Laugh Lines to save and use a copy of my image
+          and reflection for reproduction in campaign materials, including
+          social media and future creative projects. I understand this is
+          optional and I can withdraw my consent at any time.{" "}
+          <Link target="_blank" to="/privacy" className="underline">
+            Privacy Policy
+          </Link>
         </span>
       </label>
     </div>
