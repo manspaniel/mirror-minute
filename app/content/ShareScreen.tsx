@@ -615,6 +615,10 @@ function PermissionDialog({
               <Link target="_blank" to="/privacy" className="underline">
                 Privacy Policy
               </Link>
+              {" · "}
+              <Link target="_blank" to="/terms" className="underline">
+                Terms of Use
+              </Link>
             </span>
           </label>
           <Button onClick={() => onShare(permissionChecked)} className="w-full">
@@ -797,6 +801,10 @@ function Permissions() {
           optional and I can withdraw my consent at any time.{" "}
           <Link target="_blank" to="/privacy" className="underline">
             Privacy Policy
+          </Link>
+          {" · "}
+          <Link target="_blank" to="/terms" className="underline">
+            Terms of Use
           </Link>
         </span>
       </label>

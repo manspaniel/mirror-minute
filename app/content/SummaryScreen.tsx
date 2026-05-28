@@ -249,13 +249,20 @@ export function SummaryScreen() {
               >
                 Follow on Instagram
               </a>
-              <div className="absolute bottom-4 right-4">
+              <div className="absolute bottom-4 right-4 flex gap-4">
                 <Link
                   target="_blank"
                   to="/privacy"
                   className="underline text-xs md:text-sm"
                 >
                   Privacy Policy
+                </Link>
+                <Link
+                  target="_blank"
+                  to="/terms"
+                  className="underline text-xs md:text-sm"
+                >
+                  Terms of Use
                 </Link>
               </div>
             </motion.div>
